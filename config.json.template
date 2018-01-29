@@ -1,0 +1,20 @@
+{
+  "telegram": {
+    "botToken": ""
+  },
+  "bot": {
+    "userDbPath": "users.json",
+    "password": "",
+    "adminPassword": ""
+  },
+  "radarr": {
+    "hostname": "",
+    "apiKey": "",
+    "port": 80,
+    "urlBase": "",
+    "ssl": false,
+    "username": "",
+    "password": "",
+    "maxResults": 6
+  }
+}
