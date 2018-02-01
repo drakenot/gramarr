@@ -7,7 +7,10 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"sync"
 )
+
+var dbMutex sync.Mutex
 
 type UserAccess int
 
@@ -185,6 +188,9 @@ func (u *UserDB) IsRevoked(id int) bool {
 }
 
 func (u *UserDB) Save() error {
+	dbMutex.Lock()
+	defer dbMutex.Unlock()
+
 	// Open a temporary file to hold the new database
 	var tempDb *os.File
 	tempDb, err := ioutil.TempFile(filepath.Dir(u.dbPath), filepath.Base(u.dbPath))
@@ -220,6 +226,9 @@ func (u *UserDB) Save() error {
 }
 
 func (u *UserDB) Load() error {
+	dbMutex.Lock()
+	defer dbMutex.Unlock()
+
 	raw, err := ioutil.ReadFile(u.dbPath)
 	if err != nil {
 		return err
