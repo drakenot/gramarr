@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"path/filepath"
 	"time"
 
 	"github.com/drakenot/gramarr/radarr"
@@ -12,7 +13,7 @@ import (
 
 // Flags
 var (
-	configPath = flag.String("config", "config.json", "config.json path")
+	configDir = flag.String("configDir", ".", "config dir for settings and logs")
 )
 
 type Env struct {
@@ -26,19 +27,22 @@ type Env struct {
 func main() {
 	flag.Parse()
 
-	conf, err := LoadConfig(*configPath)
+	cfgDir := filepath.Dir(*configDir)
+
+	conf, err := LoadConfig(cfgDir)
 	if err != nil {
-		log.Fatalf("failed to load config file at %s: %v", *configPath, err)
+		log.Fatalf("failed to load config file: %v", err)
 	}
 
-	err = validateConfig(conf)
+	err = ValidateConfig(conf)
 	if err != nil {
 		log.Fatal("config error: %v", err)
 	}
 
-	users, err := NewUserDB(conf.Bot.UserDBPath)
+	userPath := filepath.Join(cfgDir, "users.json")
+	users, err := NewUserDB(userPath)
 	if err != nil {
-		log.Fatalf("failed to load the user db at %s: %v", conf.Bot.UserDBPath, err)
+		log.Fatalf("failed to load the user db %v", err)
 	}
 
 	var rc *radarr.Client
@@ -90,8 +94,4 @@ func setupHandlers(r *Router, e *Env) {
 
 	// Conversation Commands
 	r.HandleConvoFunc("/cancel", e.HandleConvoCancel)
-}
-
-func validateConfig(c *Config) error {
-	return nil
 }

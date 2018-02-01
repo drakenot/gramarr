@@ -2,10 +2,12 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/drakenot/gramarr/radarr"
-	"github.com/drakenot/gramarr/sonarr"
 	"io/ioutil"
 	"log"
+	"path/filepath"
+
+	"github.com/drakenot/gramarr/radarr"
+	"github.com/drakenot/gramarr/sonarr"
 )
 
 type Config struct {
@@ -20,17 +22,21 @@ type TelegramConfig struct {
 }
 
 type BotConfig struct {
-	UserDBPath    string `json:"userDbPath"`
 	Password      string `json:"password"`
 	AdminPassword string `json:"adminPassword"`
 }
 
-func LoadConfig(path string) (*Config, error) {
-	file, err := ioutil.ReadFile(path)
+func LoadConfig(configDir string) (*Config, error) {
+	configPath := filepath.Join(configDir, "config.json")
+	file, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		log.Fatalf("config load error: %v", err)
 	}
 	var c Config
 	json.Unmarshal(file, &c)
 	return &c, nil
+}
+
+func ValidateConfig(c *Config) error {
+	return nil
 }
