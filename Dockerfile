@@ -16,7 +16,6 @@ RUN \
     # install packages
     apk add --update \
 	    ca-certificates \
-		bash && \
 	    shadow && \
 
     rm -rf /var/cache/apk/* && \
