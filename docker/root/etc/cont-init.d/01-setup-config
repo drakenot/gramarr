@@ -1,0 +1,9 @@
+#!/usr/bin/with-contenv bash
+
+source /etc/env
+
+if [[ ! -f /config/config.json ]]; then
+    cp /app/config.json.template /config/config.json
+fi
+
+chown -R gram:gram /config
