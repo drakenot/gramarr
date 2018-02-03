@@ -3,6 +3,7 @@
     "botToken": ""
   },
   "bot": {
+    "name": "",
     "password": "",
     "adminPassword": ""
   },
@@ -14,6 +15,7 @@
     "ssl": false,
     "username": "",
     "password": "",
-    "maxResults": 6
+    "maxResults": 6,
+    "qualityId": 6
   }
 }

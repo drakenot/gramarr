@@ -27,9 +27,7 @@ type Env struct {
 func main() {
 	flag.Parse()
 
-	cfgDir := filepath.Dir(*configDir)
-
-	conf, err := LoadConfig(cfgDir)
+	conf, err := LoadConfig(*configDir)
 	if err != nil {
 		log.Fatalf("failed to load config file: %v", err)
 	}
@@ -39,7 +37,7 @@ func main() {
 		log.Fatal("config error: %v", err)
 	}
 
-	userPath := filepath.Join(cfgDir, "users.json")
+	userPath := filepath.Join(*configDir, "users.json")
 	users, err := NewUserDB(userPath)
 	if err != nil {
 		log.Fatalf("failed to load the user db %v", err)

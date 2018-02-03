@@ -22,6 +22,7 @@ type TelegramConfig struct {
 }
 
 type BotConfig struct {
+	Name          string `json:"name"`
 	Password      string `json:"password"`
 	AdminPassword string `json:"adminPassword"`
 }

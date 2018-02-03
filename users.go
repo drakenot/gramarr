@@ -69,7 +69,11 @@ func NewUserDB(dbPath string) (db *UserDB, err error) {
 		dbPath:   dbPath,
 	}
 
-	err = db.Load()
+	loadErr := db.Load()
+	if !os.IsNotExist(loadErr) {
+		err = loadErr
+	}
+
 	return
 }
 

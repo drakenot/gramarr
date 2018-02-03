@@ -164,7 +164,7 @@ func (c *AddMovieConversation) AskFolder(m *tb.Message) Handler {
 }
 
 func (c *AddMovieConversation) AddMovie(m *tb.Message) {
-	_, err := c.env.Radarr.AddMovie(*c.selectedMovie, 7, c.selectedFolder.Path)
+	_, err := c.env.Radarr.AddMovie(*c.selectedMovie, c.env.Config.Radarr.QualityID, c.selectedFolder.Path)
 
 	// Failed to add movie
 	if err != nil {
@@ -172,6 +172,7 @@ func (c *AddMovieConversation) AddMovie(m *tb.Message) {
 		c.env.CM.StopConversation(c)
 		return
 	}
+
 	if c.selectedMovie.PosterURL != "" {
 		photo := &tb.Photo{File: tb.FromURL(c.selectedMovie.PosterURL)}
 		c.env.Bot.Send(m.Sender, photo)

@@ -1,8 +1,10 @@
 package main
 
 import (
-	tb "gopkg.in/tucnak/telebot.v2"
+	"fmt"
 	"strings"
+
+	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 func (e *Env) HandleStart(m *tb.Message) {
@@ -10,7 +12,7 @@ func (e *Env) HandleStart(m *tb.Message) {
 	user, exists := e.Users.User(m.Sender.ID)
 
 	var msg []string
-	msg = append(msg, "Hello! Use these commands to control me:")
+	msg = append(msg, fmt.Sprintf("Hello, I'm %s! Use these commands to control me:", DisplayName(e.Bot.Me)))
 
 	if !exists {
 		msg = append(msg, "")
