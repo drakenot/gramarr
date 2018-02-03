@@ -12,7 +12,7 @@ func (e *Env) HandleStart(m *tb.Message) {
 	user, exists := e.Users.User(m.Sender.ID)
 
 	var msg []string
-	msg = append(msg, fmt.Sprintf("Hello, I'm %s! Use these commands to control me:", DisplayName(e.Bot.Me)))
+	msg = append(msg, fmt.Sprintf("Hello, I'm %s! Use these commands to control me:", e.Bot.Me.FirstName))
 
 	if !exists {
 		msg = append(msg, "")

@@ -21,7 +21,7 @@ func SendAdmin(bot *tb.Bot, to []User, msg string) {
 func SendKeyboardList(bot *tb.Bot, to tb.Recipient, msg string, list []string) {
 	var buttons []tb.ReplyButton
 	for _, item := range list {
-		buttons = append(buttons, tb.ReplyButton{Text:item})
+		buttons = append(buttons, tb.ReplyButton{Text: item})
 	}
 
 	var replyKeys [][]tb.ReplyButton
@@ -30,8 +30,8 @@ func SendKeyboardList(bot *tb.Bot, to tb.Recipient, msg string, list []string) {
 	}
 
 	bot.Send(to, msg, &tb.ReplyMarkup{
-		ReplyKeyboard:  replyKeys,
-		OneTimeKeyboard:true,
+		ReplyKeyboard:   replyKeys,
+		OneTimeKeyboard: true,
 	})
 }
 

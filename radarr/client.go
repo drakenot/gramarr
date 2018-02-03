@@ -2,9 +2,9 @@ package radarr
 
 import (
 	"fmt"
-	"strings"
-	"regexp"
 	"net/url"
+	"regexp"
+	"strings"
 
 	"gopkg.in/resty.v1"
 )
@@ -63,20 +63,21 @@ func createApiURL(c Config) string {
 
 	if c.URLBase != "" {
 		u.Path = fmt.Sprintf("%s/api", c.URLBase)
+	} else {
+		u.Path = "/api"
 	}
 
 	return u.String()
 }
 
 type Client struct {
-	apiKey   string
-	username string
-	password string
-	baseURL string
+	apiKey     string
+	username   string
+	password   string
+	baseURL    string
 	maxResults int
-	client *resty.Client
+	client     *resty.Client
 }
-
 
 func (c *Client) SearchMovies(term string) ([]Movie, error) {
 	resp, err := c.client.R().SetQueryParam("term", term).SetResult([]Movie{}).Get("movies/lookup")
@@ -101,17 +102,17 @@ func (c *Client) GetFolders() ([]Folder, error) {
 	return folders, nil
 }
 
-func (c *Client) AddMovie(m Movie, qualityProfile int, path string) (movie Movie, err error){
+func (c *Client) AddMovie(m Movie, qualityProfile int, path string) (movie Movie, err error) {
 
 	request := AddMovieRequest{
-		Title: m.Title,
-		TitleSlug: m.TitleSlug,
-		Images: m.Images,
+		Title:            m.Title,
+		TitleSlug:        m.TitleSlug,
+		Images:           m.Images,
 		QualityProfileID: qualityProfile,
-		TMDBID: m.TMDBID,
-		RootFolderPath: path,
-		Monitored: true,
-		AddOptions: AddMovieOptions{SearchForMovie:true},
+		TMDBID:           m.TMDBID,
+		RootFolderPath:   path,
+		Monitored:        true,
+		AddOptions:       AddMovieOptions{SearchForMovie: true},
 	}
 
 	resp, err := c.client.R().SetBody(request).SetResult(Movie{}).Post("movie")
