@@ -112,6 +112,7 @@ func (c *Client) AddMovie(m Movie, qualityProfile int, path string) (movie Movie
 		TMDBID:           m.TMDBID,
 		RootFolderPath:   path,
 		Monitored:        true,
+		Year:             m.Year,
 		AddOptions:       AddMovieOptions{SearchForMovie: true},
 	}
 

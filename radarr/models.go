@@ -39,6 +39,7 @@ type AddMovieRequest struct {
 	RootFolderPath   string          `json:"rootFolderPath"`
 	Monitored        bool            `json:"monitored"`
 	AddOptions       AddMovieOptions `json:"addOptions"`
+	Year             int             `json:"year"`
 }
 
 type AddMovieOptions struct {
