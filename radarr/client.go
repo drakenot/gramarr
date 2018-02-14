@@ -80,7 +80,7 @@ type Client struct {
 }
 
 func (c *Client) SearchMovies(term string) ([]Movie, error) {
-	resp, err := c.client.R().SetQueryParam("term", term).SetResult([]Movie{}).Get("movies/lookup")
+	resp, err := c.client.R().SetQueryParam("term", term).SetResult([]Movie{}).Get("movie/lookup")
 	if err != nil {
 		return nil, err
 	}
