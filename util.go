@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	tb "gopkg.in/tucnak/telebot.v2"
 )
@@ -15,7 +16,7 @@ func SendError(bot *tb.Bot, to tb.Recipient, msg string) {
 }
 
 func SendAdmin(bot *tb.Bot, to []User, msg string) {
-	SendMany(bot, to, fmt.Sprintf("*[Admin]* %s", msg))
+	SendMany(bot, to, fmt.Sprintf("*\\[Admin\\]* %s", msg))
 }
 
 func SendKeyboardList(bot *tb.Bot, to tb.Recipient, msg string, list []string) {
@@ -42,12 +43,16 @@ func SendMany(bot *tb.Bot, to []User, msg string) {
 }
 
 func DisplayName(u *tb.User) string {
-	if u.Username != "" {
-		return u.Username
-	} else {
-		if u.LastName != "" {
-			return u.FirstName + " " + u.LastName
-		}
-		return u.FirstName
+	if u.FirstName != "" && u.LastName != "" {
+		return EscapeMarkdown(fmt.Sprintf("%s %s", u.FirstName, u.LastName))
 	}
+
+	return EscapeMarkdown(u.FirstName)
+}
+
+func EscapeMarkdown(s string) string {
+	s = strings.Replace(s, "[", "\\[", -1)
+	s = strings.Replace(s, "]", "\\]", -1)
+	s = strings.Replace(s, "_", "\\_", -1)
+	return s
 }

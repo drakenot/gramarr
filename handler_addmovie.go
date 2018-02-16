@@ -41,7 +41,7 @@ func (c *AddMovieConversation) CurrentStep() Handler {
 }
 
 func (c *AddMovieConversation) AskMovie(m *tb.Message) Handler {
-	c.env.Bot.Send(m.Sender, "What movie do you want to search for?")
+	Send(c.env.Bot, m.Sender, "What movie do you want to search for?")
 
 	return func(m *tb.Message) {
 		c.movieQuery = m.Text
@@ -58,7 +58,7 @@ func (c *AddMovieConversation) AskMovie(m *tb.Message) Handler {
 
 		// No Results
 		if len(movies) == 0 {
-			msg := fmt.Sprintf("No movie found with the title '%s'", c.movieQuery)
+			msg := fmt.Sprintf("No movie found with the title '%s'", EscapeMarkdown(c.movieQuery))
 			Send(c.env.Bot, m.Sender, msg)
 			c.env.CM.StopConversation(c)
 			return
@@ -68,7 +68,7 @@ func (c *AddMovieConversation) AskMovie(m *tb.Message) Handler {
 		var msg []string
 		msg = append(msg, fmt.Sprintf("*Found %d movies:*", len(movies)))
 		for i, movie := range movies {
-			msg = append(msg, fmt.Sprintf("%d) %s", i+1, movie))
+			msg = append(msg, fmt.Sprintf("%d) %s", i+1, EscapeMarkdown(movie.String())))
 		}
 		Send(c.env.Bot, m.Sender, strings.Join(msg, "\n"))
 		c.currentStep = c.AskPickMovie(m)
@@ -131,7 +131,7 @@ func (c *AddMovieConversation) AskFolder(m *tb.Message) Handler {
 	var msg []string
 	msg = append(msg, fmt.Sprintf("*Found %d folders:*", len(folders)))
 	for i, folder := range folders {
-		msg = append(msg, fmt.Sprintf("%d) %s", i+1, filepath.Base(folder.Path)))
+		msg = append(msg, fmt.Sprintf("%d) %s", i+1, EscapeMarkdown(filepath.Base(folder.Path))))
 	}
 	Send(c.env.Bot, m.Sender, strings.Join(msg, "\n"))
 
@@ -182,7 +182,7 @@ func (c *AddMovieConversation) AddMovie(m *tb.Message) {
 	Send(c.env.Bot, m.Sender, "Movie has been added!")
 
 	// Notify Admin
-	adminMsg := fmt.Sprintf("%s added movie '%s'", DisplayName(m.Sender), c.selectedMovie)
+	adminMsg := fmt.Sprintf("%s added movie '%s'", DisplayName(m.Sender), EscapeMarkdown(c.selectedMovie.String()))
 	SendAdmin(c.env.Bot, c.env.Users.Admins(), adminMsg)
 
 	c.env.CM.StopConversation(c)

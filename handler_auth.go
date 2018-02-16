@@ -1,8 +1,8 @@
 package main
 
 import (
-	"strings"
 	"fmt"
+	"strings"
 
 	tb "gopkg.in/tucnak/telebot.v2"
 )
@@ -89,7 +89,6 @@ func (e *Env) HandleAuth(m *tb.Message) {
 
 	// Notify Admin
 	adminMsg := "%s made an invalid auth request with password: %s"
-	adminMsg = fmt.Sprintf(adminMsg, DisplayName(m.Sender), m.Payload)
+	adminMsg = fmt.Sprintf(adminMsg, DisplayName(m.Sender), EscapeMarkdown(m.Payload))
 	SendAdmin(e.Bot, e.Users.Admins(), adminMsg)
 }
-
