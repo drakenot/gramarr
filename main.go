@@ -2,7 +2,9 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -83,6 +85,7 @@ func main() {
 	}
 
 	setupHandlers(router, env)
+	fmt.Fprintf(os.Stdout, "Gramarr is up and running. Go call your bot!\n")
 	bot.Start()
 }
 

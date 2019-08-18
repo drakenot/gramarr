@@ -1,6 +1,0 @@
-#!/usr/bin/with-contenv sh
-
-source /etc/env
-
-groupmod -o -g "$PGID" gram
-usermod -o -u "$PUID" gram
