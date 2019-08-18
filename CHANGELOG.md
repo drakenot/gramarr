@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Season choice [@alcmoraes](https://github.com/alcmoraes).
 - Quality Profile choice for Radarr [@alcmoraes](https://github.com/alcmoraes).
 - Quality and Language Profile choice for Sonarr [@alcmoraes](https://github.com/alcmoraes).
+### Removed
+- Gramarr executable from .gitignore [@alcmoraes](https://github.com/alcmoraes).
 
 ## [0.1.0] - 2019-08-17
 ### Added
