@@ -1,6 +1,6 @@
 # Stage 1 - Build binary
 FROM golang:1.8 as builder
-WORKDIR /go/src/github.com/drakenot/gramarr/
+WORKDIR /go/src/github.com/alcmoraes/gramarr/
 COPY . . 
 RUN go get -d -v ./... && \
     CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o gramarr .
@@ -8,7 +8,7 @@ RUN go get -d -v ./... && \
 # Stage 2 - Create minimal image with binary 
 FROM alpine:latest  
 ADD https://github.com/just-containers/s6-overlay/releases/download/v1.21.2.2/s6-overlay-amd64.tar.gz /tmp/
-COPY --from=builder /go/src/github.com/drakenot/gramarr/gramarr /app/
+COPY --from=builder /go/src/github.com/alcmoraes/gramarr/gramarr /app/
 COPY config.json.template /app/
 COPY docker/root/ /
 

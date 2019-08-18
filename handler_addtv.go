@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/drakenot/gramarr/sonarr"
+	"github.com/alcmoraes/gramarr/sonarr"
 
 	"path/filepath"
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/drakenot/gramarr/radarr"
+	"github.com/alcmoraes/gramarr/radarr"
 
 	tb "gopkg.in/tucnak/telebot.v2"
 	"path/filepath"
