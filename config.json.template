@@ -14,8 +14,7 @@
     "ssl": false,
     "username": "",
     "password": "",
-    "maxResults": 6,
-    "qualityId": 1
+    "maxResults": 6
   },
   "sonarr": {
     "hostname": "",
@@ -25,8 +24,6 @@
     "ssl": false,
     "username": "",
     "password": "",
-    "maxResults": 6,
-    "qualityId": 6,
-    "languageId": 6
+    "maxResults": 6
   }
 }
