@@ -6,8 +6,9 @@ import (
 
 	"github.com/alcmoraes/gramarr/radarr"
 
-	tb "gopkg.in/tucnak/telebot.v2"
 	"path/filepath"
+
+	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 func (e *Env) HandleAddMovie(m *tb.Message) {
@@ -19,13 +20,14 @@ func NewAddMovieConversation(e *Env) *AddMovieConversation {
 }
 
 type AddMovieConversation struct {
-	currentStep    Handler
-	movieQuery     string
-	movieResults   []radarr.Movie
-	folderResults  []radarr.Folder
-	selectedMovie  *radarr.Movie
-	selectedFolder *radarr.Folder
-	env            *Env
+	currentStep            Handler
+	movieQuery             string
+	movieResults           []radarr.Movie
+	folderResults          []radarr.Folder
+	selectedMovie          *radarr.Movie
+	selectedQualityProfile *radarr.Profile
+	selectedFolder         *radarr.Folder
+	env                    *Env
 }
 
 func (c *AddMovieConversation) Run(m *tb.Message) {
@@ -102,6 +104,45 @@ func (c *AddMovieConversation) AskPickMovie(m *tb.Message) Handler {
 			return
 		}
 
+		c.currentStep = c.AskPickMovieQuality(m)
+	}
+}
+
+func (c *AddMovieConversation) AskPickMovieQuality(m *tb.Message) Handler {
+
+	profiles, err := c.env.Radarr.GetProfile("profile")
+
+	// GetProfile Service Failed
+	if err != nil {
+		SendError(c.env.Bot, m.Sender, "Failed to get quality profiles.")
+		c.env.CM.StopConversation(c)
+		return nil
+	}
+
+	// Send custom reply keyboard
+	var options []string
+	for _, QualityProfile := range profiles {
+		options = append(options, fmt.Sprintf("%v", QualityProfile.Name))
+	}
+	options = append(options, "/cancel")
+	SendKeyboardList(c.env.Bot, m.Sender, "Which quality shall I look for?", options)
+
+	return func(m *tb.Message) {
+		// Set the selected option
+		for i := range options {
+			if m.Text == options[i] {
+				c.selectedQualityProfile = &profiles[i]
+				break
+			}
+		}
+
+		// Not a valid selection
+		if c.selectedQualityProfile == nil {
+			SendError(c.env.Bot, m.Sender, "Invalid selection.")
+			c.currentStep = c.AskPickMovieQuality(m)
+			return
+		}
+
 		c.currentStep = c.AskFolder(m)
 	}
 }
@@ -164,7 +205,7 @@ func (c *AddMovieConversation) AskFolder(m *tb.Message) Handler {
 }
 
 func (c *AddMovieConversation) AddMovie(m *tb.Message) {
-	_, err := c.env.Radarr.AddMovie(*c.selectedMovie, c.env.Config.Radarr.QualityID, c.selectedFolder.Path)
+	_, err := c.env.Radarr.AddMovie(*c.selectedMovie, c.selectedQualityProfile.ID, c.selectedFolder.Path)
 
 	// Failed to add movie
 	if err != nil {

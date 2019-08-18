@@ -24,6 +24,11 @@ type MovieImage struct {
 	URL       string `json:"url"`
 }
 
+type Profile struct {
+	Name string `json:"name"`
+	ID   int    `json:"id"`
+}
+
 type Folder struct {
 	Path      string `json:"path"`
 	FreeSpace int64  `json:"freeSpace"`
@@ -31,15 +36,16 @@ type Folder struct {
 }
 
 type AddMovieRequest struct {
-	Title            string          `json:"title"`
-	TitleSlug        string          `json:"titleSlug"`
-	Images           []MovieImage    `json:"images"`
-	QualityProfileID int             `json:"qualityProfileId"`
-	TMDBID           int             `json:"tmdbId"`
-	RootFolderPath   string          `json:"rootFolderPath"`
-	Monitored        bool            `json:"monitored"`
-	AddOptions       AddMovieOptions `json:"addOptions"`
-	Year             int             `json:"year"`
+	Title             string          `json:"title"`
+	TitleSlug         string          `json:"titleSlug"`
+	Images            []MovieImage    `json:"images"`
+	QualityProfileID  int             `json:"qualityProfileId"`
+	LanguageProfileID int             `json:"languageProfileId"`
+	TMDBID            int             `json:"tmdbId"`
+	RootFolderPath    string          `json:"rootFolderPath"`
+	Monitored         bool            `json:"monitored"`
+	AddOptions        AddMovieOptions `json:"addOptions"`
+	Year              int             `json:"year"`
 }
 
 type AddMovieOptions struct {
