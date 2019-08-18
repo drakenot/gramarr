@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- More details to Readme [@alcmoraes](https://github.com/alcmoraes).
 - Changelog [@alcmoraes](https://github.com/alcmoraes).
 - Season choice [@alcmoraes](https://github.com/alcmoraes).
 - Quality Profile choice for Radarr [@alcmoraes](https://github.com/alcmoraes).
