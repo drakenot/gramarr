@@ -16,6 +16,14 @@ archives:
     windows: Windows
     386: i386
     amd64: x86_64
+  format_overrides:
+    - goos: windows
+      format: zip
+  files:
+    - config.json.template
+    - LICENSE
+    - README.md
+    - CHANGELOG.md
 checksum:
   name_template: 'checksums.txt'
 snapshot:
