@@ -102,6 +102,18 @@ func (c *Client) GetFolders() ([]Folder, error) {
 	return folders, nil
 }
 
+func (c *Client) GetProfile(prfl string) ([]Profile, error) {
+
+	resp, err := c.client.R().SetResult([]Profile{}).Get(prfl)
+	if err != nil {
+		return nil, err
+	}
+	profile := *resp.Result().(*[]Profile)
+
+	return profile, nil
+
+}
+
 func (c *Client) AddTVShow(m TVShow, languageProfile int, qualityProfile int, path string) (tvShow TVShow, err error) {
 
 	request := AddTVShowRequest{

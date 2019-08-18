@@ -3,13 +3,13 @@ package sonarr
 import "fmt"
 
 type TVShow struct {
-	Title     string         `json:"title"`
-	TitleSlug string         `json:"titleSlug"`
-	Year      int            `json:"year"`
-	PosterURL string         `json:"remotePoster"`
-	TVDBID    int            `json:"tvdbId"`
-	Images    []TVShowImage  `json:"images"`
-	Seasons   []TVShowSeason `json:"seasons"`
+	Title     string          `json:"title"`
+	TitleSlug string          `json:"titleSlug"`
+	Year      int             `json:"year"`
+	PosterURL string          `json:"remotePoster"`
+	TVDBID    int             `json:"tvdbId"`
+	Images    []TVShowImage   `json:"images"`
+	Seasons   []*TVShowSeason `json:"seasons"`
 }
 
 func (m TVShow) String() string {
@@ -36,6 +36,11 @@ type Folder struct {
 	ID        int    `json:"id"`
 }
 
+type Profile struct {
+	Name string `json:"name"`
+	ID   int    `json:"id"`
+}
+
 type AddTVShowRequest struct {
 	Title             string           `json:"title"`
 	TitleSlug         string           `json:"titleSlug"`
@@ -47,7 +52,7 @@ type AddTVShowRequest struct {
 	Monitored         bool             `json:"monitored"`
 	AddOptions        AddTVShowOptions `json:"addOptions"`
 	Year              int              `json:"year"`
-	Seasons           []TVShowSeason   `json:"seasons"`
+	Seasons           []*TVShowSeason  `json:"seasons"`
 }
 
 type AddTVShowOptions struct {
