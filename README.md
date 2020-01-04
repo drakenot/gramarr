@@ -45,6 +45,14 @@ Just [download](https://github.com/alcmoraes/gramarr/releases/latest) the respec
 
 *Obs: Don't forget to put the `config.json` in the same folder as the binary file.*
 
+### Docker
+
+```bash
+
+docker run -it -v /path/to/config.json/dir:/etc/gramarr spaceinvaderz/gramarr:latest gramarr -configDir /etc/gramarr
+
+```
+
 ## TODO
 
 - **Package oriented**: Reorganize the project.
