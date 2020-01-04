@@ -1,4 +1,5 @@
 # gramarr
+
 A [Radarr](https://github.com/Radarr/Radarr)/[Sonarr](https://github.com/Sonarr/Sonarr) Telegram Bot featuring user authentication/level access.
 
 ## Features
@@ -23,6 +24,7 @@ A [Radarr](https://github.com/Radarr/Radarr)/[Sonarr](https://github.com/Sonarr/
 ## Configuration
 
 - Copy the `config.json.template` file to `config.json` and set-up your configuration;
+
 - Put the `config.json` alongside with the binary downloaded from [releases](https://github.com/alcmoraes/gramarr/releases);
 
 ## Running it
@@ -30,9 +32,11 @@ A [Radarr](https://github.com/Radarr/Radarr)/[Sonarr](https://github.com/Sonarr/
 ### From source
 
 ```bash
-$ go get github.com/alcmoraes/gramarr
-$ cd $GOPATH/src/github.com/alcmoraes/gramarr
-$ go run .
+
+ go get github.com/alcmoraes/gramarr
+ cd $GOPATH/src/github.com/alcmoraes/gramarr
+ go run .
+
 ```
 
 ### From release
