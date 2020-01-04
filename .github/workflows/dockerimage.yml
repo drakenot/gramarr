@@ -3,10 +3,6 @@ on:
   push:
     branches:
       - master
-env:
- LOGIN: ${{ secrets.DOCKER_LOGIN }}
- NAME: "gramarr"
-
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
@@ -15,8 +11,8 @@ jobs:
       run:  echo ${{ secrets.DOCKER_PWD }} | docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
     - uses: actions/checkout@v1
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag gramarr:latest
+      run: docker build . --file Dockerfile --tag spaceinvaderz/gramarr:latest --tag spaceinvaderz/gramarr:${GITHUB_REF:11}
     - name: Push image to hub.docker.com
-      run: docker push $LOGIN/$NAME:latest
+      run: docker push spaceinvaderz/gramarr:latest
     
 
