@@ -49,7 +49,9 @@ Just [download](https://github.com/alcmoraes/gramarr/releases/latest) the respec
 
 ```bash
 
-docker run -it -v /path/to/config.json/dir:/etc/gramarr spaceinvaderz/gramarr:latest gramarr -configDir /etc/gramarr
+docker run -it -v /path/to/config.json/dir:/etc/gramarr \
+      spaceinvaderz/gramarr:latest \
+      gramarr -configDir /etc/gramarr
 
 ```
 
