@@ -1,14 +1,22 @@
 name: Docker Image CI
-
-on: [push]
+on: 
+  push:
+    branches:
+      - master
+env:
+ LOGIN: ${{ secrets.DOCKER_LOGIN }}
+ NAME: "gramarr"
 
 jobs:
-
-  build:
-
+  build-and-publish:
     runs-on: ubuntu-latest
-
     steps:
+    - name: Login to docker.io
+      run:  echo ${{ secrets.DOCKER_PWD }} | docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
     - uses: actions/checkout@v1
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag gramarr:$(date +%s)
+      run: docker build . --file Dockerfile --tag gramarr:latest
+    - name: Push image to hub.docker.com
+      run: docker push $LOGIN/$NAME:latest
+    
+
