@@ -3,6 +3,7 @@ config.json
 dist
 
 .idea/
+.vscode/
 
 # Binaries for programs and plugins
 *.exe
