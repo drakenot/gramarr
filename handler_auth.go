@@ -7,6 +7,7 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
+// HandleAuth func
 func (e *Env) HandleAuth(m *tb.Message) {
 	var msg []string
 	pass := m.Payload

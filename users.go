@@ -15,12 +15,17 @@ var dbMutex sync.Mutex
 type UserAccess int
 
 const (
+	// UANone const
 	UANone UserAccess = iota
+	// UARevoked const
 	UARevoked
+	// UAMember const
 	UAMember
+	// UAAdmin const
 	UAAdmin
 )
 
+// User struct
 type User struct {
 	ID        int        `json:"id"`
 	Username  string     `json:"username"`
@@ -29,18 +34,22 @@ type User struct {
 	Access    UserAccess `json:"access"`
 }
 
+// IsAdmin func
 func (u User) IsAdmin() bool {
 	return u.Access == UAAdmin
 }
 
+// IsMember func
 func (u User) IsMember() bool {
 	return u.Access == UAMember
 }
 
+// IsRevoked func
 func (u User) IsRevoked() bool {
 	return u.Access == UARevoked
 }
 
+// DisplayName func
 func (u User) DisplayName() string {
 	if u.Username != "" {
 		return u.Username
@@ -52,16 +61,19 @@ func (u User) DisplayName() string {
 	}
 }
 
+// Recipient func
 func (u User) Recipient() string {
 	return strconv.Itoa(u.ID)
 }
 
+// UserDB struct
 type UserDB struct {
 	users    []User
 	usersMap map[int]User
 	dbPath   string
 }
 
+// NewUserDB func
 func NewUserDB(dbPath string) (db *UserDB, err error) {
 	db = &UserDB{
 		users:    []User{},
@@ -77,6 +89,7 @@ func NewUserDB(dbPath string) (db *UserDB, err error) {
 	return
 }
 
+// Create func
 func (u *UserDB) Create(user User) error {
 	if u.Exists(user.ID) {
 		return fmt.Errorf("user with ID %d already exists", user.ID)
@@ -89,6 +102,7 @@ func (u *UserDB) Create(user User) error {
 	return nil
 }
 
+// Update func
 func (u *UserDB) Update(user User) error {
 	if !u.Exists(user.ID) {
 		return fmt.Errorf("user with ID %d doesn't exist", user.ID)
@@ -106,6 +120,7 @@ func (u *UserDB) Update(user User) error {
 	return nil
 }
 
+// Delete func
 func (u *UserDB) Delete(user User) error {
 	if !u.Exists(user.ID) {
 		return fmt.Errorf("user with ID %d doesn't exist", user.ID)
@@ -123,20 +138,24 @@ func (u *UserDB) Delete(user User) error {
 	return nil
 }
 
+// User func
 func (u *UserDB) User(id int) (User, bool) {
 	user, exists := u.usersMap[id]
 	return user, exists
 }
 
+// Exists func
 func (u *UserDB) Exists(id int) bool {
 	_, ok := u.usersMap[id]
 	return ok
 }
 
+// Users func
 func (u *UserDB) Users() []User {
 	return u.users
 }
 
+// Admins func
 func (u *UserDB) Admins() []User {
 	var result []User
 	for _, user := range u.users {
@@ -147,6 +166,7 @@ func (u *UserDB) Admins() []User {
 	return result
 }
 
+// Members func
 func (u *UserDB) Members() []User {
 	var result []User
 	for _, user := range u.users {
@@ -157,6 +177,7 @@ func (u *UserDB) Members() []User {
 	return result
 }
 
+// Revoked func
 func (u *UserDB) Revoked() []User {
 	var result []User
 	for _, user := range u.users {
@@ -167,6 +188,7 @@ func (u *UserDB) Revoked() []User {
 	return result
 }
 
+// IsAdmin func
 func (u *UserDB) IsAdmin(id int) bool {
 	user, ok := u.usersMap[id]
 	if !ok {
@@ -175,6 +197,7 @@ func (u *UserDB) IsAdmin(id int) bool {
 	return user.Access == UAAdmin
 }
 
+// IsMember func
 func (u *UserDB) IsMember(id int) bool {
 	user, ok := u.usersMap[id]
 	if !ok {
@@ -183,6 +206,7 @@ func (u *UserDB) IsMember(id int) bool {
 	return user.Access == UAMember
 }
 
+// IsRevoked func
 func (u *UserDB) IsRevoked(id int) bool {
 	user, ok := u.usersMap[id]
 	if !ok {
@@ -191,6 +215,7 @@ func (u *UserDB) IsRevoked(id int) bool {
 	return user.Access == UARevoked
 }
 
+// Save func
 func (u *UserDB) Save() error {
 	dbMutex.Lock()
 	defer dbMutex.Unlock()
@@ -229,6 +254,7 @@ func (u *UserDB) Save() error {
 	return nil
 }
 
+// Load func
 func (u *UserDB) Load() error {
 	dbMutex.Lock()
 	defer dbMutex.Unlock()

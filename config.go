@@ -10,6 +10,7 @@ import (
 	"github.com/alcmoraes/gramarr/sonarr"
 )
 
+// Config struct
 type Config struct {
 	Telegram TelegramConfig `json:"telegram"`
 	Bot      BotConfig      `json:"bot"`
@@ -17,16 +18,19 @@ type Config struct {
 	Sonarr   *sonarr.Config `json:"sonarr"`
 }
 
+// TelegramConfig struct
 type TelegramConfig struct {
 	BotToken string `json:"botToken"`
 }
 
+// BotConfig struct
 type BotConfig struct {
 	Name          string `json:"name"`
 	Password      string `json:"password"`
 	AdminPassword string `json:"adminPassword"`
 }
 
+// LoadConfig func
 func LoadConfig(configDir string) (*Config, error) {
 	configPath := filepath.Join(configDir, "config.json")
 	file, err := ioutil.ReadFile(configPath)
@@ -38,6 +42,7 @@ func LoadConfig(configDir string) (*Config, error) {
 	return &c, nil
 }
 
+// ValidateConfig func
 func ValidateConfig(c *Config) error {
 	return nil
 }

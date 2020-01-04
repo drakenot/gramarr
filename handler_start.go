@@ -7,6 +7,7 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
+// HandleStart func
 func (e *Env) HandleStart(m *tb.Message) {
 
 	user, exists := e.Users.User(m.Sender.ID)

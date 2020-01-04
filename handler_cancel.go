@@ -7,10 +7,12 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
+// HandleCancel func
 func (e *Env) HandleCancel(m *tb.Message) {
 	Send(e.Bot, m.Sender,"There is no active command to cancel. I wasn't doing anything anyway. Zzzzz..." )
 }
 
+// HandleConvoCancel func
 func (e *Env) HandleConvoCancel(c Conversation, m *tb.Message) {
 	e.CM.StopConversation(c)
 

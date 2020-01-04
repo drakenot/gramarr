@@ -11,14 +11,17 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
+// HandleAddTVShow func
 func (e *Env) HandleAddTVShow(m *tb.Message) {
 	e.CM.StartConversation(NewAddTVShowConversation(e), m)
 }
 
+// NewAddTVShowConversation func
 func NewAddTVShowConversation(e *Env) *AddTVShowConversation {
 	return &AddTVShowConversation{env: e}
 }
 
+// AddTVShowConversation struct
 type AddTVShowConversation struct {
 	currentStep             Handler
 	TVQuery                 string
@@ -32,18 +35,22 @@ type AddTVShowConversation struct {
 	env                     *Env
 }
 
+// Run func
 func (c *AddTVShowConversation) Run(m *tb.Message) {
 	c.currentStep = c.AskTVShow(m)
 }
 
+// Name func
 func (c *AddTVShowConversation) Name() string {
 	return "addtv"
 }
 
+// CurrentStep func
 func (c *AddTVShowConversation) CurrentStep() Handler {
 	return c.currentStep
 }
 
+// AskTVShow func
 func (c *AddTVShowConversation) AskTVShow(m *tb.Message) Handler {
 	Send(c.env.Bot, m.Sender, "What TV Show do you want to search for?")
 
@@ -79,6 +86,7 @@ func (c *AddTVShowConversation) AskTVShow(m *tb.Message) Handler {
 	}
 }
 
+// AskPickTVShow func
 func (c *AddTVShowConversation) AskPickTVShow(m *tb.Message) Handler {
 
 	// Send custom reply keyboard
@@ -110,6 +118,7 @@ func (c *AddTVShowConversation) AskPickTVShow(m *tb.Message) Handler {
 	}
 }
 
+// AskPickTVShowSeason func
 func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) Handler {
 
 	// Send custom reply keyboard
@@ -173,6 +182,7 @@ func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) Handler {
 	}
 }
 
+// AskPickTVShowQuality func
 func (c *AddTVShowConversation) AskPickTVShowQuality(m *tb.Message) Handler {
 
 	profiles, err := c.env.Sonarr.GetProfile("qualityprofile")
@@ -212,6 +222,7 @@ func (c *AddTVShowConversation) AskPickTVShowQuality(m *tb.Message) Handler {
 	}
 }
 
+// AskPickTVShowLanguage func
 func (c *AddTVShowConversation) AskPickTVShowLanguage(m *tb.Message) Handler {
 
 	languages, err := c.env.Sonarr.GetProfile("languageprofile")
@@ -251,6 +262,7 @@ func (c *AddTVShowConversation) AskPickTVShowLanguage(m *tb.Message) Handler {
 	}
 }
 
+// AskFolder func
 func (c *AddTVShowConversation) AskFolder(m *tb.Message) Handler {
 
 	folders, err := c.env.Sonarr.GetFolders()
@@ -308,6 +320,7 @@ func (c *AddTVShowConversation) AskFolder(m *tb.Message) Handler {
 	}
 }
 
+// AddTVShow func
 func (c *AddTVShowConversation) AddTVShow(m *tb.Message) {
 	_, err := c.env.Sonarr.AddTVShow(*c.selectedTVShow, c.selectedLanguageProfile.ID, c.selectedQualityProfile.ID, c.selectedFolder.Path)
 

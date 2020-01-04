@@ -19,6 +19,7 @@ var (
 	configDir = flag.String("configDir", ".", "config dir for settings and logs")
 )
 
+// Env struct
 type Env struct {
 	Config *Config
 	Users  *UserDB
@@ -89,6 +90,7 @@ func main() {
 	bot.Start()
 }
 
+// setupHandlers func
 func setupHandlers(r *Router, e *Env) {
 	// Send all telegram messages to our custom router
 	e.Bot.Handle(tb.OnText, r.Route)

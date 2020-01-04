@@ -6,6 +6,7 @@ import (
 	"fmt"
 )
 
+// RequireAuth func
 func (e *Env) RequireAuth(access UserAccess, h func(m *tb.Message)) func(m *tb.Message) {
 	return func(m *tb.Message) {
 		user, _ := e.Users.User(m.Sender.ID)
@@ -54,6 +55,7 @@ func (e *Env) RequireAuth(access UserAccess, h func(m *tb.Message)) func(m *tb.M
 	}
 }
 
+// RequirePrivate func
 func (e *Env) RequirePrivate(h func(m *tb.Message)) func(m *tb.Message) {
 	return func(m *tb.Message) {
 		if !m.Private() {
