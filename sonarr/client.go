@@ -103,7 +103,6 @@ func (c *Client) GetFolders() ([]Folder, error) {
 }
 
 func (c *Client) GetProfile(prfl string) ([]Profile, error) {
-
 	resp, err := c.client.R().SetResult([]Profile{}).Get(prfl)
 	if err != nil {
 		return nil, err
@@ -112,6 +111,18 @@ func (c *Client) GetProfile(prfl string) ([]Profile, error) {
 
 	return profile, nil
 
+}
+
+func (c *Client) GetSystemStatus() (SystemStatus, error) {
+	var systemStatus SystemStatus
+
+	resp, err := c.client.R().SetResult(SystemStatus{}).Get("/system/status")
+	if err != nil {
+		return systemStatus, err
+	}
+	systemStatus = *resp.Result().(*SystemStatus)
+
+	return systemStatus, nil
 }
 
 func (c *Client) AddTVShow(m TVShow, languageProfile int, qualityProfile int, path string) (tvShow TVShow, err error) {
