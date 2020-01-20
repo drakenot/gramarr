@@ -6,8 +6,8 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/alcmoraes/gramarr/radarr"
-	"github.com/alcmoraes/gramarr/sonarr"
+	"github.com/gramarr/radarr"
+	"github.com/gramarr/sonarr"
 )
 
 // Config struct

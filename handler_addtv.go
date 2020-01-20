@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/alcmoraes/gramarr/sonarr"
+	"github.com/gramarr/sonarr"
 
 	"path/filepath"
 
@@ -185,7 +185,7 @@ func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) Handler {
 // AskPickTVShowQuality func
 func (c *AddTVShowConversation) AskPickTVShowQuality(m *tb.Message) Handler {
 
-	profiles, err := c.env.Sonarr.GetProfile("qualityprofile")
+	profiles, err := c.env.Sonarr.GetProfile("v3/qualityprofile")
 
 	// GetProfile Service Failed
 	if err != nil {
@@ -225,7 +225,7 @@ func (c *AddTVShowConversation) AskPickTVShowQuality(m *tb.Message) Handler {
 // AskPickTVShowLanguage func
 func (c *AddTVShowConversation) AskPickTVShowLanguage(m *tb.Message) Handler {
 
-	languages, err := c.env.Sonarr.GetProfile("languageprofile")
+	languages, err := c.env.Sonarr.GetProfile("v3/languageprofile")
 
 	// GetProfile Service Failed
 	if err != nil {

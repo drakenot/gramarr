@@ -111,7 +111,6 @@ func (c *Client) GetProfile(prfl string) ([]Profile, error) {
 	profile := *resp.Result().(*[]Profile)
 
 	return profile, nil
-
 }
 
 func (c *Client) AddTVShow(m TVShow, languageProfile int, qualityProfile int, path string) (tvShow TVShow, err error) {
