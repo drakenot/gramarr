@@ -1,6 +1,8 @@
 package sonarr
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type TVShow struct {
 	Title     string          `json:"title"`
@@ -59,4 +61,28 @@ type AddTVShowOptions struct {
 	SearchForMissingEpisodes   bool `json:"searchForMissingEpisodes"`
 	IgnoreEpisodesWithFiles    bool `json:"ignoreEpisodesWithFiles"`
 	IgnoreEpisodesWithoutFiles bool `json:"ignoreEpisodesWithoutFiles"`
+}
+
+type SystemStatus struct {
+	Version           string `json:"version"`
+	BuildTime         string `json:"buildTime"`
+	IsDebug           bool   `json:"isDebug"`
+	IsProduction      bool   `json:"isProduction"`
+	IsAdmin           bool   `json:"isAdmin"`
+	IsUserInteractive bool   `json:"isUserInteractive"`
+	StartupPath       string `json:"startupPath"`
+	AppData           string `json:"appData"`
+	OsName            string `json:"osName"`
+	OsVersion         string `json:"osVersion"`
+	IsMonoRuntime     bool   `json:"isMonoRuntime"`
+	IsMono            bool   `json:"isMono"`
+	IsLinux           bool   `json:"isLinux"`
+	IsOsx             bool   `json:"isOsx"`
+	IsWindows         bool   `json:"isWindows"`
+	Branch            string `json:"branch"`
+	Authentication    string `json:"authentication"`
+	SqliteVersion     string `json:"sqliteVersion"`
+	UrlBase           string `json:"urlBase"`
+	RuntimeVersion    string `json:"runtimeVersion"`
+	RuntimeName       string `json:"runtimeName"`
 }
