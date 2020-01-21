@@ -19,7 +19,7 @@ func SendError(bot *tb.Bot, to tb.Recipient, msg string) {
 
 // SendAdmin func
 func SendAdmin(bot *tb.Bot, to []User, msg string) {
-	SendMany(bot, to, fmt.Sprintf("*\\[Admin\\]* %s", msg))
+	SendMany(bot, to, fmt.Sprintf("*[Admin]* %s", msg))
 }
 
 // SendKeyboardList func
