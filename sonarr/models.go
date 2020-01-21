@@ -2,7 +2,6 @@ package sonarr
 
 import (
 	"fmt"
-	"time"
 )
 
 type TVShow struct {
@@ -65,20 +64,25 @@ type AddTVShowOptions struct {
 }
 
 type SystemStatus struct {
-	Version           string    `json:"version"`
-	BuildTime         time.Time `json:"buildTime"`
-	IsDebug           bool      `json:"isDebug"`
-	IsProduction      bool      `json:"isProduction"`
-	IsAdmin           bool      `json:"isAdmin"`
-	IsUserInteractive bool      `json:"isUserInteractive"`
-	StartupPath       string    `json:"startupPath"`
-	AppData           string    `json:"appData"`
-	OsVersion         string    `json:"osVersion"`
-	IsMono            bool      `json:"isMono"`
-	IsLinux           bool      `json:"isLinux"`
-	IsWindows         bool      `json:"isWindows"`
-	Branch            string    `json:"branch"`
-	Authentication    bool      `json:"authentication"`
-	StartOfWeek       int       `json:"startOfWeek"`
-	UrlBase           string    `json:"urlBase"`
+	Version           string `json:"version"`
+	BuildTime         string `json:"buildTime"`
+	IsDebug           bool   `json:"isDebug"`
+	IsProduction      bool   `json:"isProduction"`
+	IsAdmin           bool   `json:"isAdmin"`
+	IsUserInteractive bool   `json:"isUserInteractive"`
+	StartupPath       string `json:"startupPath"`
+	AppData           string `json:"appData"`
+	OsName            string `json:"osName"`
+	OsVersion         string `json:"osVersion"`
+	IsMonoRuntime     bool   `json:"isMonoRuntime"`
+	IsMono            bool   `json:"isMono"`
+	IsLinux           bool   `json:"isLinux"`
+	IsOsx             bool   `json:"isOsx"`
+	IsWindows         bool   `json:"isWindows"`
+	Branch            string `json:"branch"`
+	Authentication    string `json:"authentication"`
+	SqliteVersion     string `json:"sqliteVersion"`
+	UrlBase           string `json:"urlBase"`
+	RuntimeVersion    string `json:"runtimeVersion"`
+	RuntimeName       string `json:"runtimeName"`
 }

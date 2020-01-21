@@ -136,3 +136,15 @@ func (c *Client) AddMovie(m Movie, qualityProfile int, path string) (movie Movie
 	movie = *resp.Result().(*Movie)
 	return
 }
+
+func (c *Client) GetSystemStatus() (SystemStatus, error) {
+	var systemStatus SystemStatus
+
+	resp, err := c.client.R().SetResult(SystemStatus{}).Get("/system/status")
+	if err != nil {
+		return systemStatus, err
+	}
+	systemStatus = *resp.Result().(*SystemStatus)
+
+	return systemStatus, nil
+}
