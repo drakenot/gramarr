@@ -31,6 +31,7 @@ func (e *Env) HandleStart(m *tb.Message) {
 		msg = append(msg, "")
 		msg = append(msg, "*Media*")
 		msg = append(msg, "/addmovie - add a movie")
+		msg = append(msg, "/listmovies - displays all movies")
 		msg = append(msg, "/addtv - add a tv show")
 		msg = append(msg, "")
 		msg = append(msg, "/cancel - cancel the current operation")

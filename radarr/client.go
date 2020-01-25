@@ -104,6 +104,16 @@ func (c *Client) GetProfile(prfl string) ([]Profile, error) {
 
 }
 
+func (c *Client) GetMovies() ([]Movie, error) {
+	resp, err := c.client.R().SetResult([]Movie{}).Get("movie")
+	if err != nil {
+		return nil, err
+	}
+
+	movies := *resp.Result().(*[]Movie)
+	return movies, nil
+}
+
 func (c *Client) GetFolders() ([]Folder, error) {
 	resp, err := c.client.R().SetResult([]Folder{}).Get("rootfolder")
 	if err != nil {
