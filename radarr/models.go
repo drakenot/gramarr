@@ -3,12 +3,21 @@ package radarr
 import "fmt"
 
 type Movie struct {
-	Title     string       `json:"title"`
-	TitleSlug string       `json:"titleSlug"`
-	Year      int          `json:"year"`
-	PosterURL string       `json:"remotePoster"`
-	TMDBID    int          `json:"tmdbId"`
-	Images    []MovieImage `json:"images"`
+	Title           string       `json:"title"`
+	TitleSlug       string       `json:"titleSlug"`
+	Year            int          `json:"year"`
+	PosterURL       string       `json:"remotePoster"`
+	TMDBID          int          `json:"tmdbId"`
+	Images          []MovieImage `json:"images"`
+	ProfileId       int          `json:"profileId"`
+	HasFile         bool         `json:"hasFile"`
+	Id              int          `json:"id"`
+	InCinemas       string       `json:"inCinemas"`
+	PhysicalRelease string       `json:"physicalRelease"`
+	Overview        string       `json:"overview"`
+	Tags            []int        `json:"tags"`
+	MovieFile       MovieFile    `json:"movieFile"`
+	Path            string       `json:"path"`
 }
 
 func (m Movie) String() string {
@@ -17,6 +26,16 @@ func (m Movie) String() string {
 	} else {
 		return m.Title
 	}
+}
+
+type MovieTag struct {
+	Label string `json:"label"`
+	Id    int    `json:"id"`
+}
+
+type MovieFile struct {
+	DateAdded    string `json:"dateAdded"`
+	RelativePath string `json:"relativePath"`
 }
 
 type MovieImage struct {

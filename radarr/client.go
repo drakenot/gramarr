@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"gopkg.in/resty.v1"
@@ -79,6 +80,16 @@ type Client struct {
 	client     *resty.Client
 }
 
+func (c *Client) SearchMovie(tmdbId int) (Movie, error) {
+	var movie Movie
+	resp, err := c.client.R().SetQueryParam("tmdbId", strconv.Itoa(tmdbId)).SetResult(Movie{}).Get("movie/lookup/tmdb")
+	if err != nil {
+		return movie, err
+	}
+	movie = *resp.Result().(*Movie)
+	return movie, nil
+}
+
 func (c *Client) SearchMovies(term string) ([]Movie, error) {
 	resp, err := c.client.R().SetQueryParam("term", term).SetResult([]Movie{}).Get("movie/lookup")
 	if err != nil {
@@ -104,14 +115,40 @@ func (c *Client) GetProfile(prfl string) ([]Profile, error) {
 
 }
 
+func (c *Client) GetMoviesFromFolder(folder Folder) ([]Movie, error) {
+	movies, err := c.GetMovies()
+	if err != nil {
+		return nil, err
+	}
+	var ret []Movie
+	for _, movie := range movies {
+		if strings.HasPrefix(movie.Path, folder.Path) {
+			ret = append(ret, movie)
+		}
+	}
+
+	return ret, nil
+}
+
 func (c *Client) GetMovies() ([]Movie, error) {
 	resp, err := c.client.R().SetResult([]Movie{}).Get("movie")
 	if err != nil {
 		return nil, err
 	}
-
 	movies := *resp.Result().(*[]Movie)
 	return movies, nil
+}
+
+func (c *Client) GetMovie(movieId int) (Movie, error) {
+	var movie Movie
+
+	resp, err := c.client.R().SetResult(Movie{}).Get("/movie/" + strconv.Itoa(movieId))
+	if err != nil {
+		return movie, err
+	}
+	movie = *resp.Result().(*Movie)
+
+	return movie, nil
 }
 
 func (c *Client) GetFolders() ([]Folder, error) {
@@ -157,4 +194,38 @@ func (c *Client) GetSystemStatus() (SystemStatus, error) {
 	systemStatus = *resp.Result().(*SystemStatus)
 
 	return systemStatus, nil
+}
+
+func (c *Client) GetPosterURL(movie Movie) string {
+	for _, image := range movie.Images {
+		if image.CoverType == "poster" {
+			return image.URL
+		}
+	}
+	return ""
+}
+
+func (c *Client) GetTags() ([]MovieTag, error) {
+	resp, err := c.client.R().SetResult([]MovieTag{}).Get("tag")
+	if err != nil {
+		return nil, err
+	}
+	tags := *resp.Result().(*[]MovieTag)
+	return tags, nil
+}
+
+func (c *Client) GetRequester(movie Movie) string {
+	tags, err := c.GetTags()
+	if err != nil {
+		return ""
+	}
+	var requester []string
+	for _, movieTagId := range movie.Tags {
+		for _, tag := range tags {
+			if movieTagId == tag.Id {
+				requester = append(requester, strings.Title(tag.Label))
+			}
+		}
+	}
+	return strings.Join(requester, ", ")
 }

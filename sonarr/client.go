@@ -142,7 +142,6 @@ func (c *Client) AddTVShow(m TVShow, languageProfile int, qualityProfile int, pa
 
 	resp, err := c.client.R().SetBody(request).SetResult(TVShow{}).Post("series")
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 

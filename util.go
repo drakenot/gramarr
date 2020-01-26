@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
+	"time"
 
 	tb "gopkg.in/tucnak/telebot.v2"
 )
@@ -62,4 +64,33 @@ func EscapeMarkdown(s string) string {
 	s = strings.Replace(s, "]", "\\]", -1)
 	s = strings.Replace(s, "_", "\\_", -1)
 	return s
+}
+
+func BoolToYesOrNo(condition bool) string {
+	if condition {
+		return "Yes"
+	}
+	return "No"
+}
+
+func FormatDate(dateStr string) string {
+	if dateStr == "" {
+		return "Unknown"
+	}
+	dateStr = strings.Split(dateStr, "T")[0]
+	t, _ := time.Parse("2006-01-02", dateStr)
+	return t.Format("02.01.2006")
+}
+
+func FormatDateTime(dateStr string) string {
+	if dateStr == "" {
+		return "Unknown"
+	}
+	dateStr = strings.Split(strings.Split(dateStr, ".")[0], "Z")[0]
+	t, _ := time.Parse("2006-01-02T15:04:05", dateStr)
+	return t.Format("02.01.2006 15:04:05")
+}
+
+func GetRootFolderFromPath(path string) string {
+	return strings.Title(filepath.Base(filepath.Dir(path)))
 }
