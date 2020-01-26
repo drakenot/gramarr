@@ -30,6 +30,7 @@ type AddMovieConversation struct {
 	selectedMovie          *radarr.Movie
 	selectedQualityProfile *radarr.Profile
 	selectedFolder         *radarr.Folder
+	user                   User
 	env                    *Env
 }
 
@@ -50,34 +51,30 @@ func (c *AddMovieConversation) CurrentStep() Handler {
 
 // AskMovie func
 func (c *AddMovieConversation) AskMovie(m *tb.Message) Handler {
+	c.user, _ = c.env.Users.User(m.Sender.ID)
+
 	Send(c.env.Bot, m.Sender, "What movie do you want to search for?")
 
 	return func(m *tb.Message) {
 		c.movieQuery = m.Text
-
 		movies, err := c.env.Radarr.SearchMovies(c.movieQuery)
 		c.movieResults = movies
 
-		// Search Service Failed
 		if err != nil {
 			SendError(c.env.Bot, m.Sender, "Failed to search movies.")
 			c.env.CM.StopConversation(c)
 			return
 		}
 
-		// No Results
 		if len(movies) == 0 {
-			msg := fmt.Sprintf("No movie found with the title '%s'", EscapeMarkdown(c.movieQuery))
-			Send(c.env.Bot, m.Sender, msg)
+			Send(c.env.Bot, m.Sender, fmt.Sprintf("No movie found with the title '%s'", EscapeMarkdown(c.movieQuery)))
 			c.env.CM.StopConversation(c)
 			return
 		}
 
-		// Found some movies! Yay!
-		var msg []string
-		msg = append(msg, fmt.Sprintf("*Found %d movies:*", len(movies)))
-		for i, movie := range movies {
-			msg = append(msg, fmt.Sprintf("%d) %s", i+1, EscapeMarkdown(movie.String())))
+		msg := []string{fmt.Sprintf("*Found %d movies:*", len(movies))}
+		for _, movie := range movies {
+			msg = append(msg, fmt.Sprintf("- %s", EscapeMarkdown(movie.String())))
 		}
 		Send(c.env.Bot, m.Sender, strings.Join(msg, "\n"))
 		c.currentStep = c.AskPickMovie(m)
@@ -118,8 +115,7 @@ func (c *AddMovieConversation) AskPickMovie(m *tb.Message) Handler {
 
 // AskPickMovieQuality func
 func (c *AddMovieConversation) AskPickMovieQuality(m *tb.Message) Handler {
-
-	profiles, err := c.env.Radarr.GetProfile("profile")
+	profiles, err := c.env.Radarr.GetProfile(c.user.IsAdmin())
 
 	// GetProfile Service Failed
 	if err != nil {
@@ -128,13 +124,26 @@ func (c *AddMovieConversation) AskPickMovieQuality(m *tb.Message) Handler {
 		return nil
 	}
 
+	if len(profiles) == 0 {
+		SendError(c.env.Bot, m.Sender, "No profiles found.")
+		c.env.CM.StopConversation(c)
+		return nil
+	}
+
+	if len(profiles) == 1 {
+		Send(c.env.Bot, m.Sender, fmt.Sprintf("Profile '%s' has automatically been selected", profiles[0].Name))
+		c.selectedQualityProfile = &profiles[0]
+		c.currentStep = c.AskFolder(m)
+		return nil
+	}
+
 	// Send custom reply keyboard
 	var options []string
-	for _, QualityProfile := range profiles {
-		options = append(options, fmt.Sprintf("%v", QualityProfile.Name))
+	for _, profile := range profiles {
+		options = append(options, fmt.Sprintf("%s", profile.Name))
 	}
 	options = append(options, "/cancel")
-	SendKeyboardList(c.env.Bot, m.Sender, "Which quality shall I look for?", options)
+	SendKeyboardList(c.env.Bot, m.Sender, "Select a profile", options)
 
 	return func(m *tb.Message) {
 		// Set the selected option
@@ -159,7 +168,7 @@ func (c *AddMovieConversation) AskPickMovieQuality(m *tb.Message) Handler {
 // AskFolder func
 func (c *AddMovieConversation) AskFolder(m *tb.Message) Handler {
 
-	folders, err := c.env.Radarr.GetFolders()
+	folders, err := c.env.Radarr.GetFolders(c.user.IsAdmin())
 	c.folderResults = folders
 
 	// GetFolders Service Failed
@@ -169,30 +178,26 @@ func (c *AddMovieConversation) AskFolder(m *tb.Message) Handler {
 		return nil
 	}
 
-	// No Results
 	if len(folders) == 0 {
 		SendError(c.env.Bot, m.Sender, "No destination folders found.")
 		c.env.CM.StopConversation(c)
 		return nil
 	}
 
-	// Found folders!
+	if len(folders) == 1 {
+		Send(c.env.Bot, m.Sender, fmt.Sprintf("Folder '%s' has automatically been selected", strings.Title(EscapeMarkdown(filepath.Base(folders[0].Path)))))
+		c.selectedFolder = &folders[0]
+		c.AddMovie(m)
+		return nil
+	}
 
 	// Send the results
-	var msg []string
-	msg = append(msg, fmt.Sprintf("*Found %d folders:*", len(folders)))
-	for i, folder := range folders {
-		msg = append(msg, fmt.Sprintf("%d) %s", i+1, EscapeMarkdown(filepath.Base(folder.Path))))
-	}
-	Send(c.env.Bot, m.Sender, strings.Join(msg, "\n"))
-
-	// Send the custom reply keyboard
 	var options []string
 	for _, folder := range folders {
-		options = append(options, fmt.Sprintf("%s", filepath.Base(folder.Path)))
+		options = append(options, strings.Title(fmt.Sprintf("%s", filepath.Base(folder.Path))))
 	}
 	options = append(options, "/cancel")
-	SendKeyboardList(c.env.Bot, m.Sender, "Which folder should it download to?", options)
+	SendKeyboardList(c.env.Bot, m.Sender, "Select a folder", options)
 
 	return func(m *tb.Message) {
 		// Set the selected folder

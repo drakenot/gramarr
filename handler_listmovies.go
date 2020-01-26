@@ -48,7 +48,7 @@ func (c *ListMoviesConversation) CurrentStep() Handler {
 
 func (c *ListMoviesConversation) AskFolder(m *tb.Message) Handler {
 
-	folders, err := c.env.Radarr.GetFolders()
+	folders, err := c.env.Radarr.GetFolders(true)
 	c.folderResults = folders
 
 	// GetFolders Service Failed

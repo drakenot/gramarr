@@ -34,12 +34,14 @@ func NewClient(c Config) (*Client, error) {
 	}
 
 	client := Client{
-		apiKey:     c.APIKey,
-		maxResults: c.MaxResults,
-		username:   c.Username,
-		password:   c.Password,
-		baseURL:    baseURL,
-		client:     r,
+		apiKey:             c.APIKey,
+		maxResults:         c.MaxResults,
+		username:           c.Username,
+		password:           c.Password,
+		baseURL:            baseURL,
+		restrictedFolders:  c.RestrictedFolders,
+		restrictedProfiles: c.RestrictedProfiles,
+		client:             r,
 	}
 	return &client, nil
 }
@@ -72,12 +74,14 @@ func createApiURL(c Config) string {
 }
 
 type Client struct {
-	apiKey     string
-	username   string
-	password   string
-	baseURL    string
-	maxResults int
-	client     *resty.Client
+	apiKey             string
+	username           string
+	password           string
+	baseURL            string
+	maxResults         int
+	restrictedFolders  []int
+	restrictedProfiles []int
+	client             *resty.Client
 }
 
 func (c *Client) SearchMovie(tmdbId int) (Movie, error) {
@@ -103,16 +107,24 @@ func (c *Client) SearchMovies(term string) ([]Movie, error) {
 	return movies, nil
 }
 
-func (c *Client) GetProfile(prfl string) ([]Profile, error) {
-
-	resp, err := c.client.R().SetResult([]Profile{}).Get(prfl)
+func (c *Client) GetProfile(isAdmin bool) ([]Profile, error) {
+	resp, err := c.client.R().SetResult([]Profile{}).Get("profile")
 	if err != nil {
 		return nil, err
 	}
-	profile := *resp.Result().(*[]Profile)
+	allProfiles := *resp.Result().(*[]Profile)
+	if isAdmin {
+		return allProfiles, nil
+	}
 
-	return profile, nil
+	var profiles []Profile
+	for _, profile := range allProfiles {
+		if !contains(c.restrictedProfiles, profile.ID) {
+			profiles = append(profiles, profile)
+		}
+	}
 
+	return profiles, nil
 }
 
 func (c *Client) GetMoviesFromFolder(folder Folder) ([]Movie, error) {
@@ -151,13 +163,22 @@ func (c *Client) GetMovie(movieId int) (Movie, error) {
 	return movie, nil
 }
 
-func (c *Client) GetFolders() ([]Folder, error) {
+func (c *Client) GetFolders(isAdmin bool) ([]Folder, error) {
 	resp, err := c.client.R().SetResult([]Folder{}).Get("rootfolder")
 	if err != nil {
 		return nil, err
 	}
+	allFolders := *resp.Result().(*[]Folder)
+	if isAdmin {
+		return allFolders, nil
+	}
 
-	folders := *resp.Result().(*[]Folder)
+	var folders []Folder
+	for _, folder := range allFolders {
+		if !contains(c.restrictedFolders, folder.ID) {
+			folders = append(folders, folder)
+		}
+	}
 	return folders, nil
 }
 
@@ -228,4 +249,13 @@ func (c *Client) GetRequester(movie Movie) string {
 		}
 	}
 	return strings.Join(requester, ", ")
+}
+
+func contains(s []int, e int) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
