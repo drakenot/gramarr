@@ -69,9 +69,9 @@ func (c *ListMoviesConversation) AskFolder(m *tb.Message) Handler {
 
 	// Send the results
 	var msg []string
-	msg = append(msg, fmt.Sprintf("*Found %d folders:*", len(folders)))
-	for i, folder := range folders {
-		msg = append(msg, fmt.Sprintf("%d) %s", i+1, EscapeMarkdown(strings.Title(filepath.Base(folder.Path)))))
+	msg = append(msg, "*Available folders:*")
+	for _, folder := range folders {
+		msg = append(msg, fmt.Sprintf("- %s", EscapeMarkdown(strings.Title(filepath.Base(folder.Path)))))
 	}
 	Send(c.env.Bot, m.Sender, strings.Join(msg, "\n"))
 
@@ -121,12 +121,12 @@ func (c *ListMoviesConversation) AskMovie(m *tb.Message) Handler {
 	var fulfilled = []string{"*Available Movies:*"}
 	var pending = []string{"*Pending Movies:*"}
 	var options []string
-	for i, movie := range c.movieResults {
+	for _, movie := range c.movieResults {
 		options = append(options, EscapeMarkdown(movie.Title))
 		if movie.HasFile {
-			fulfilled = append(fulfilled, fmt.Sprintf("%d) %s", i, EscapeMarkdown(movie.Title)))
+			fulfilled = append(fulfilled, fmt.Sprintf("- %s", EscapeMarkdown(movie.Title)))
 		} else {
-			pending = append(pending, fmt.Sprintf("%d) %s", i, EscapeMarkdown(movie.Title)))
+			pending = append(pending, fmt.Sprintf("- %s", EscapeMarkdown(movie.Title)))
 		}
 	}
 	if len(fulfilled) > 1 {
@@ -171,16 +171,16 @@ func (c *ListMoviesConversation) AskMovie(m *tb.Message) Handler {
 		msg = append(msg, fmt.Sprintf("*%s (%d)*", EscapeMarkdown(c.selectedMovie.Title), c.selectedMovie.Year))
 		msg = append(msg, c.selectedMovie.Overview)
 		msg = append(msg, "")
-		msg = append(msg, fmt.Sprintf("In Cinemas: %s", FormatDate(c.selectedMovie.InCinemas)))
-		msg = append(msg, fmt.Sprintf("BluRay Date: %s", FormatDate(c.selectedMovie.PhysicalRelease)))
-		msg = append(msg, fmt.Sprintf("Folder: %s", GetRootFolderFromPath(c.selectedMovie.Path)))
+		msg = append(msg, fmt.Sprintf("*Cinema Date:* %s", FormatDate(c.selectedMovie.InCinemas)))
+		msg = append(msg, fmt.Sprintf("*BluRay Date:* %s", FormatDate(c.selectedMovie.PhysicalRelease)))
+		msg = append(msg, fmt.Sprintf("*Folder:* %s", GetRootFolderFromPath(c.selectedMovie.Path)))
 		if c.selectedMovie.HasFile {
-			msg = append(msg, fmt.Sprintf("Downloaded: %s", FormatDateTime(c.selectedMovie.MovieFile.DateAdded)))
-			msg = append(msg, fmt.Sprintf("File: %s", c.selectedMovie.MovieFile.RelativePath))
+			msg = append(msg, fmt.Sprintf("*Downloaded:* %s", FormatDateTime(c.selectedMovie.MovieFile.DateAdded)))
+			msg = append(msg, fmt.Sprintf("*File:* %s", c.selectedMovie.MovieFile.RelativePath))
 		} else {
-			msg = append(msg, fmt.Sprintf("Downloaded: %s", BoolToYesOrNo(c.selectedMovie.HasFile)))
+			msg = append(msg, fmt.Sprintf("*Downloaded:* %s", BoolToYesOrNo(c.selectedMovie.HasFile)))
 		}
-		msg = append(msg, fmt.Sprintf("Requested by: %s", c.env.Radarr.GetRequester(*c.selectedMovie)))
+		msg = append(msg, fmt.Sprintf("*Requested by:* %s", c.env.Radarr.GetRequester(*c.selectedMovie)))
 
 		Send(c.env.Bot, m.Sender, strings.Join(msg, "\n"))
 
