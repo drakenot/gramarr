@@ -6,6 +6,7 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -150,8 +151,6 @@ func (c *ListMoviesConversation) AskMovie(m *tb.Message) Handler {
 		for i, opt := range options {
 			if m.Text == opt {
 				c.selectedMovie = &c.movieResults[i]
-				m, _ := c.env.Radarr.SearchMovie(c.selectedMovie.TMDBID)
-				c.selectedMovie.PosterURL = c.env.Radarr.GetPosterURL(m)
 				break
 			}
 		}
@@ -162,28 +161,8 @@ func (c *ListMoviesConversation) AskMovie(m *tb.Message) Handler {
 			return
 		}
 
-		if c.selectedMovie.PosterURL != "" {
-			photo := &tb.Photo{File: tb.FromURL(c.selectedMovie.PosterURL)}
-			c.env.Bot.Send(m.Sender, photo)
-		}
-
-		var msg []string
-		msg = append(msg, fmt.Sprintf("*%s (%d)*", EscapeMarkdown(c.selectedMovie.Title), c.selectedMovie.Year))
-		msg = append(msg, c.selectedMovie.Overview)
-		msg = append(msg, "")
-		msg = append(msg, fmt.Sprintf("*Cinema Date:* %s", FormatDate(c.selectedMovie.InCinemas)))
-		msg = append(msg, fmt.Sprintf("*BluRay Date:* %s", FormatDate(c.selectedMovie.PhysicalRelease)))
-		msg = append(msg, fmt.Sprintf("*Folder:* %s", GetRootFolderFromPath(c.selectedMovie.Path)))
-		if c.selectedMovie.HasFile {
-			msg = append(msg, fmt.Sprintf("*Downloaded:* %s", FormatDateTime(c.selectedMovie.MovieFile.DateAdded)))
-			msg = append(msg, fmt.Sprintf("*File:* %s", c.selectedMovie.MovieFile.RelativePath))
-		} else {
-			msg = append(msg, fmt.Sprintf("*Downloaded:* %s", BoolToYesOrNo(c.selectedMovie.HasFile)))
-		}
-		msg = append(msg, fmt.Sprintf("*Requested by:* %s", c.env.Radarr.GetRequester(*c.selectedMovie)))
-
-		Send(c.env.Bot, m.Sender, strings.Join(msg, "\n"))
-
+		m.Payload = strconv.Itoa(c.selectedMovie.ID)
+		c.env.HandleDetails(m)
 		c.env.CM.StopConversation(c)
 	}
 
