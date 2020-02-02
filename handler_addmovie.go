@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/gramarr/radarr"
@@ -109,7 +110,27 @@ func (c *AddMovieConversation) AskPickMovie(m *tb.Message) Handler {
 			return
 		}
 
-		c.currentStep = c.AskPickMovieQuality(m)
+		// Check if movie already exists
+		existingMovie := radarr.Movie{}
+		movies, err := c.env.Radarr.GetMovies()
+		if err == nil {
+			for _, movie := range movies {
+				if movie.TmdbID == c.selectedMovie.TmdbID {
+					existingMovie = movie
+				}
+			}
+		}
+		if existingMovie.ID >= 0 {
+			Send(c.env.Bot, m.Sender, "This movie has already been requested. You will be added to the requester list")
+			_, _ = c.env.Radarr.SetRequester(existingMovie, m.Sender.FirstName)
+			m.Payload = strconv.Itoa(c.selectedMovie.ID)
+			c.env.HandleDetails(m)
+
+			c.env.CM.StopConversation(c)
+			return
+		} else {
+			c.currentStep = c.AskPickMovieQuality(m)
+		}
 	}
 }
 
@@ -221,7 +242,7 @@ func (c *AddMovieConversation) AskFolder(m *tb.Message) Handler {
 
 // AddMovie func
 func (c *AddMovieConversation) AddMovie(m *tb.Message) {
-	_, err := c.env.Radarr.AddMovie(*c.selectedMovie, c.selectedQualityProfile.ID, c.selectedFolder.Path)
+	_, err := c.env.Radarr.AddMovie(*c.selectedMovie, c.selectedQualityProfile.ID, c.selectedFolder.Path, m.Sender.FirstName)
 
 	// Failed to add movie
 	if err != nil {
@@ -230,8 +251,8 @@ func (c *AddMovieConversation) AddMovie(m *tb.Message) {
 		return
 	}
 
-	if c.selectedMovie.PosterURL != "" {
-		photo := &tb.Photo{File: tb.FromURL(c.selectedMovie.PosterURL)}
+	if c.selectedMovie.RemotePoster != "" {
+		photo := &tb.Photo{File: tb.FromURL(c.selectedMovie.RemotePoster)}
 		c.env.Bot.Send(m.Sender, photo)
 	}
 
