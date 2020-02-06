@@ -1,0 +1,7 @@
+version: '2'
+services:
+  gramarr:
+    image: golang:1.13
+    build: .
+    volumes:
+      - ./config.json:/app/config.json
