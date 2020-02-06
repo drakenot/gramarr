@@ -18,7 +18,12 @@ A [Radarr](https://github.com/Radarr/Radarr)/[Sonarr](https://github.com/Sonarr/
 
 ### If running from source
 
-- Go
+- [Go](https://golang.org/)
+
+### If running from docker
+
+- [Docker](https://docker.io)
+- [Docker Compose](https://docs.docker.com/compose/)
 
 ## Configuration
 
@@ -26,6 +31,12 @@ A [Radarr](https://github.com/Radarr/Radarr)/[Sonarr](https://github.com/Sonarr/
 - Put the `config.json` alongside with the binary downloaded from [releases](https://github.com/alcmoraes/gramarr/releases);
 
 ## Running it
+
+### From Docker
+
+```bash
+$ docker-compose up -d
+```
 
 ### From source
 
