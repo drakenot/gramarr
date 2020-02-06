@@ -16,6 +16,9 @@ A [Radarr](https://github.com/Radarr/Radarr)/[Sonarr](https://github.com/Sonarr/
 
 ## Requirements
 
+- A running instance of Radarr
+- A running instance of Sonarr V3 (preview)
+
 ### If running from source
 
 - [Go](https://golang.org/)
