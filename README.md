@@ -1,5 +1,7 @@
 # gramarr
-A [Radarr](https://github.com/Radarr/Radarr)/[Sonarr](https://github.com/Sonarr/Sonarr) Telegram Bot featuring user authentication/level access.
+## A [Radarr](https://github.com/Radarr/Radarr) and [Sonarr](https://github.com/Sonarr/Sonarr) Telegram Bot featuring user authentication/level access.
+
+![Grammar](https://extraimage.com/images/2020/02/06/gramarr.jpg)
 
 ## Features
 
