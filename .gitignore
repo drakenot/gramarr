@@ -21,3 +21,4 @@ full-setup
 dist
 bin
 config
+vendor

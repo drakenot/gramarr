@@ -16,7 +16,7 @@ import (
 
 // Flags
 var (
-	configDir = flag.String("configDir", ".", "config dir for settings and logs")
+	configDir = flag.String("configDir", "./config", "config dir for settings and logs")
 )
 
 // Env struct
