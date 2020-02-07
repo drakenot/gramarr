@@ -67,6 +67,8 @@ func createApiURL(c Config) string {
 		u.Path = "/api/v3"
 	}
 
+	fmt.Println("The URL for Sonarr is", u.String())
+
 	return u.String()
 }
 

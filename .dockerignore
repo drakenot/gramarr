@@ -1,9 +1,4 @@
-users.json
-config.json
-dist
-
 .idea/
-.vscode/
 
 # Binaries for programs and plugins
 *.exe
@@ -21,8 +16,6 @@ dist
 .glide/
 
 full-setup
-
 dist
 bin
-config.json
 users.json
