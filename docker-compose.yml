@@ -1,0 +1,7 @@
+version: '3'
+services:
+  gramarr:
+    build: .
+    command: /usr/bin/gramarr -configDir /etc/gramarr
+    volumes:
+      - ./config:/etc/gramarr

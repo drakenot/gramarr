@@ -70,6 +70,8 @@ func createApiURL(c Config) string {
 		u.Path = "/api"
 	}
 
+	fmt.Println("The URL for Radarr is", u.String())
+
 	return u.String()
 }
 
