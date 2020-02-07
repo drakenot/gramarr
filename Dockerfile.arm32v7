@@ -1,4 +1,4 @@
-FROM golang:1.12.9 as builder
+FROM golang:1.13 as builder
 
 WORKDIR /go/src/github.com/gramarr
 COPY "${PWD}" /go/src/github.com/gramarr
