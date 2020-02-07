@@ -14,7 +14,9 @@
     "ssl": false,
     "username": "",
     "password": "",
-    "maxResults": 6
+    "maxResults": 6,
+    "restrictedFolders": [],
+    "restrictedProfiles": []
   },
   "sonarr": {
     "hostname": "",

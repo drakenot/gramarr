@@ -73,21 +73,17 @@ func BoolToYesOrNo(condition bool) string {
 	return "No"
 }
 
-func FormatDate(dateStr string) string {
-	if dateStr == "" {
+func FormatDate(t time.Time) string {
+	if t.IsZero() {
 		return "Unknown"
 	}
-	dateStr = strings.Split(dateStr, "T")[0]
-	t, _ := time.Parse("2006-01-02", dateStr)
 	return t.Format("02.01.2006")
 }
 
-func FormatDateTime(dateStr string) string {
-	if dateStr == "" {
+func FormatDateTime(t time.Time) string {
+	if t.IsZero() {
 		return "Unknown"
 	}
-	dateStr = strings.Split(strings.Split(dateStr, ".")[0], "Z")[0]
-	t, _ := time.Parse("2006-01-02T15:04:05", dateStr)
 	return t.Format("02.01.2006 15:04:05")
 }
 
