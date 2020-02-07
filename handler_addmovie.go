@@ -20,7 +20,6 @@ func NewAddMovieConversation(e *Env) *AddMovieConversation {
 	return &AddMovieConversation{env: e}
 }
 
-// AddMovieConversation struct
 type AddMovieConversation struct {
 	currentStep            Handler
 	movieQuery             string
@@ -76,7 +75,6 @@ func (c *AddMovieConversation) AskMovie(m *tb.Message) Handler {
 	}
 }
 
-// AskPickMovie struct
 func (c *AddMovieConversation) AskPickMovie(m *tb.Message) Handler {
 
 	// Send custom reply keyboard

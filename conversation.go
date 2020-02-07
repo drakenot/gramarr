@@ -7,14 +7,12 @@ import (
 	"time"
 )
 
-// Conversation interface
 type Conversation interface {
 	Run(m *tb.Message)
 	CurrentStep() Handler
 	Name() string
 }
 
-// ConversationManager struct
 type ConversationManager struct {
 	convos *cache.Cache
 }

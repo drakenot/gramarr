@@ -18,7 +18,6 @@ func NewListMoviesConversation(e *Env) *ListMoviesConversation {
 	return &ListMoviesConversation{env: e}
 }
 
-// AddMovieConversation struct
 type ListMoviesConversation struct {
 	currentStep            Handler
 	movieQuery             string

@@ -10,7 +10,6 @@ import (
 	"github.com/gramarr/sonarr"
 )
 
-// Config struct
 type Config struct {
 	Telegram TelegramConfig `json:"telegram"`
 	Bot      BotConfig      `json:"bot"`
@@ -18,12 +17,10 @@ type Config struct {
 	Sonarr   *sonarr.Config `json:"sonarr"`
 }
 
-// TelegramConfig struct
 type TelegramConfig struct {
 	BotToken string `json:"botToken"`
 }
 
-// BotConfig struct
 type BotConfig struct {
 	Name          string `json:"name"`
 	Password      string `json:"password"`

@@ -14,12 +14,10 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-// Flags
 var (
 	configDir = flag.String("configDir", "./config", "config dir for settings and logs")
 )
 
-// Env struct
 type Env struct {
 	Config *Config
 	Users  *UserDB

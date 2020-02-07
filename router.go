@@ -18,7 +18,6 @@ func NewRouter(cm *ConversationManager) *Router {
 	return &Router{cm: cm, routes: map[string]Handler{}, convoRoutes: map[string]ConvoHandler{}}
 }
 
-// Router struct
 type Router struct {
 	cm          *ConversationManager
 	routes      map[string]Handler

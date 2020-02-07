@@ -19,7 +19,6 @@ func NewAddTVShowConversation(e *Env) *AddTVShowConversation {
 	return &AddTVShowConversation{env: e}
 }
 
-// AddTVShowConversation struct
 type AddTVShowConversation struct {
 	currentStep             Handler
 	TVQuery                 string
