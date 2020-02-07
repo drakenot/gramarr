@@ -61,10 +61,9 @@ func createApiURL(c Config) string {
 		u.Host = fmt.Sprintf("%s:%d", c.Hostname, c.Port)
 	}
 
+	u.Path = "/api/v3"
 	if c.URLBase != "" {
-		u.Path = fmt.Sprintf("%s/api", c.URLBase)
-	} else {
-		u.Path = "/api/v3"
+		u.Path = fmt.Sprintf("%s%s", c.URLBase, u.Path)
 	}
 
 	fmt.Println("The URL for Sonarr is", u.String())
