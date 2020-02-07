@@ -103,7 +103,7 @@ func (c *AddMovieConversation) AskPickMovie(m *tb.Message) Handler {
 		}
 
 		// Check if movie already exists
-		existingMovie := radarr.Movie{}
+		var existingMovie radarr.Movie
 		movies, err := c.env.Radarr.GetMovies()
 		if err == nil {
 			for _, movie := range movies {
@@ -112,7 +112,7 @@ func (c *AddMovieConversation) AskPickMovie(m *tb.Message) Handler {
 				}
 			}
 		}
-		if existingMovie.ID >= 0 {
+		if existingMovie.ID > 0 {
 			Send(c.env.Bot, m.Sender, "This movie has already been requested. You will be added to the requester list")
 			_, _ = c.env.Radarr.SetRequester(existingMovie, m.Sender.FirstName)
 			m.Payload = strconv.Itoa(c.selectedMovie.ID)

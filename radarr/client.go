@@ -70,8 +70,6 @@ func createApiURL(c Config) string {
 		u.Path = "/api"
 	}
 
-	fmt.Println("The URL for Radarr is", u.String())
-
 	return u.String()
 }
 
@@ -96,7 +94,6 @@ func (c *Client) SetRequester(m Movie, requester string) (Movie, error) {
 }
 
 func (c *Client) UpdateMovie(m Movie) (movie Movie, err error) {
-	fmt.Println(m.Tags)
 	resp, err := c.client.R().SetBody(m).SetResult(Movie{}).Put("movie")
 	if err != nil {
 		return
