@@ -1,7 +1,3 @@
-users.json
-config.json
-dist
-
 .idea/
 .vscode/
 
@@ -24,5 +20,4 @@ full-setup
 
 dist
 bin
-config.json
-users.json
+config
