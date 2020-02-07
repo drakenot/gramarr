@@ -12,12 +12,10 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-// HandleAddMovie func
 func (e *Env) HandleAddMovie(m *tb.Message) {
 	e.CM.StartConversation(NewAddMovieConversation(e), m)
 }
 
-// NewAddMovieConversation func
 func NewAddMovieConversation(e *Env) *AddMovieConversation {
 	return &AddMovieConversation{env: e}
 }
@@ -35,22 +33,18 @@ type AddMovieConversation struct {
 	env                    *Env
 }
 
-// Run func
 func (c *AddMovieConversation) Run(m *tb.Message) {
 	c.currentStep = c.AskMovie(m)
 }
 
-// Name func
 func (c *AddMovieConversation) Name() string {
 	return "addmovie"
 }
 
-// CurrentStep funcfunc
 func (c *AddMovieConversation) CurrentStep() Handler {
 	return c.currentStep
 }
 
-// AskMovie func
 func (c *AddMovieConversation) AskMovie(m *tb.Message) Handler {
 	c.user, _ = c.env.Users.User(m.Sender.ID)
 
@@ -134,7 +128,6 @@ func (c *AddMovieConversation) AskPickMovie(m *tb.Message) Handler {
 	}
 }
 
-// AskPickMovieQuality func
 func (c *AddMovieConversation) AskPickMovieQuality(m *tb.Message) Handler {
 	profiles, err := c.env.Radarr.GetProfile(c.user.IsAdmin())
 
@@ -186,7 +179,6 @@ func (c *AddMovieConversation) AskPickMovieQuality(m *tb.Message) Handler {
 	}
 }
 
-// AskFolder func
 func (c *AddMovieConversation) AskFolder(m *tb.Message) Handler {
 
 	folders, err := c.env.Radarr.GetFolders(c.user.IsAdmin())
@@ -240,7 +232,6 @@ func (c *AddMovieConversation) AskFolder(m *tb.Message) Handler {
 	}
 }
 
-// AddMovie func
 func (c *AddMovieConversation) AddMovie(m *tb.Message) {
 	_, err := c.env.Radarr.AddMovie(*c.selectedMovie, c.selectedQualityProfile.ID, c.selectedFolder.Path, m.Sender.FirstName)
 

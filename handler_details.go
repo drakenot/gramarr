@@ -7,7 +7,6 @@ import (
 	"strings"
 )
 
-// HandleAuth func
 func (e *Env) HandleDetails(m *tb.Message) {
 	movieId, err := strconv.Atoi(m.Payload)
 	if err != nil {

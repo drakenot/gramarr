@@ -10,12 +10,10 @@ import (
 	"strings"
 )
 
-// HandleAddMovie func
 func (e *Env) HandleListMovies(m *tb.Message) {
 	e.CM.StartConversation(NewListMoviesConversation(e), m)
 }
 
-// NewAddMovieConversation func
 func NewListMoviesConversation(e *Env) *ListMoviesConversation {
 	return &ListMoviesConversation{env: e}
 }
@@ -32,17 +30,14 @@ type ListMoviesConversation struct {
 	env                    *Env
 }
 
-// Run func
 func (c *ListMoviesConversation) Run(m *tb.Message) {
 	c.currentStep = c.AskFolder(m)
 }
 
-// Name func
 func (c *ListMoviesConversation) Name() string {
 	return "listMovies"
 }
 
-// CurrentStep funcfunc
 func (c *ListMoviesConversation) CurrentStep() Handler {
 	return c.currentStep
 }
@@ -111,7 +106,6 @@ func (c *ListMoviesConversation) AskFolder(m *tb.Message) Handler {
 	}
 }
 
-// HandleAddMovie func
 func (c *ListMoviesConversation) AskMovie(m *tb.Message) Handler {
 	c.movieResults, _ = c.env.Radarr.GetMoviesFromFolder(*c.selectedFolder)
 

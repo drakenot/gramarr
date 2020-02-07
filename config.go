@@ -30,7 +30,6 @@ type BotConfig struct {
 	AdminPassword string `json:"adminPassword"`
 }
 
-// LoadConfig func
 func LoadConfig(configDir string) (*Config, error) {
 	configPath := filepath.Join(configDir, "config.json")
 	file, err := ioutil.ReadFile(configPath)
@@ -42,7 +41,6 @@ func LoadConfig(configDir string) (*Config, error) {
 	return &c, nil
 }
 
-// ValidateConfig func
 func ValidateConfig(c *Config) error {
 	return nil
 }

@@ -5,7 +5,6 @@ import (
 	"strings"
 )
 
-// HandleUsers func
 func (e *Env) HandleUsers(m *tb.Message) {
 	err := e.Users.Load()
 	if err != nil {

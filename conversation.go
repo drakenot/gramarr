@@ -19,13 +19,11 @@ type ConversationManager struct {
 	convos *cache.Cache
 }
 
-// NewConversationManager func
 func NewConversationManager() *ConversationManager {
 	convos := cache.New(30*time.Minute, 10*time.Minute)
 	return &ConversationManager{convos: convos}
 }
 
-// ProcessMessage func
 func (cm *ConversationManager) ProcessMessage(m *tb.Message) {
 	key := cm.convoKey(m)
 	if convo, ok := cm.convos.Get(key); ok {
@@ -34,19 +32,16 @@ func (cm *ConversationManager) ProcessMessage(m *tb.Message) {
 	}
 }
 
-// HasConversation func
 func (cm *ConversationManager) HasConversation(m *tb.Message) bool {
 	_, exists := cm.convos.Get(cm.convoKey(m))
 	return exists
 }
 
-// StartConversation func
 func (cm *ConversationManager) StartConversation(c Conversation, m *tb.Message) {
 	c.Run(m)
 	cm.convos.SetDefault(cm.convoKey(m), c)
 }
 
-// StopConversation func
 func (cm *ConversationManager) StopConversation(c Conversation) {
 	for key, item := range cm.convos.Items() {
 		current := item.Object.(Conversation)
@@ -56,13 +51,11 @@ func (cm *ConversationManager) StopConversation(c Conversation) {
 	}
 }
 
-// Conversation func
 func (cm *ConversationManager) Conversation(m *tb.Message) (Conversation, bool) {
 	c, exists := cm.convos.Get(cm.convoKey(m))
 	return c.(Conversation), exists
 }
 
-// convoKey func
 func (cm *ConversationManager) convoKey(m *tb.Message) string {
 	return fmt.Sprintf("%d:%d", m.Chat.ID, m.Sender.ID)
 }
