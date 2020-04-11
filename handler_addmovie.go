@@ -114,7 +114,7 @@ func (c *AddMovieConversation) AskPickMovie(m *tb.Message) Handler {
 		}
 		if existingMovie.ID > 0 {
 			Send(c.env.Bot, m.Sender, "This movie has already been requested. You will be added to the requester list")
-			_, _ = c.env.Radarr.SetRequester(existingMovie, m.Sender.FirstName)
+			_, _ = c.env.Radarr.AddRequester(existingMovie, m.Sender.FirstName)
 			m.Payload = strconv.Itoa(c.selectedMovie.ID)
 			c.env.HandleDetails(m)
 

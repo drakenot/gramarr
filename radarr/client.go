@@ -84,7 +84,22 @@ type Client struct {
 	client             *resty.Client
 }
 
-func (c *Client) SetRequester(m Movie, requester string) (Movie, error) {
+func (c *Client) RemoveRequester(m Movie, requester string) (Movie, error) {
+	tag, err := c.GetTagByLabel(requester, true)
+	if err != nil {
+		return m, err
+	}
+	var filteredTags []int
+	for i := range m.Tags {
+		if m.Tags[i] != tag.Id {
+			filteredTags = append(filteredTags, m.Tags[i])
+		}
+	}
+	m.Tags = filteredTags
+	return c.UpdateMovie(m)
+}
+
+func (c *Client) AddRequester(m Movie, requester string) (Movie, error) {
 	tag, err := c.GetTagByLabel(requester, true)
 	if err != nil {
 		return m, err
@@ -141,7 +156,23 @@ func (c *Client) GetProfile(isAdmin bool) (profiles []Profile, err error) {
 	return
 }
 
-func (c *Client) GetMoviesFromFolder(folder Folder) (movies []Movie, err error) {
+func (c *Client) GetMoviesByRequester(requester string) (movies []Movie, err error) {
+	allMovies, err := c.GetMovies()
+	if err != nil {
+		return
+	}
+	for _, movie := range allMovies {
+		for _, t := range movie.Tags {
+			tag, _ := c.GetTagById(t)
+			if requester == tag.Label {
+				movies = append(movies, movie)
+			}
+		}
+	}
+	return
+}
+
+func (c *Client) GetMoviesByFolder(folder Folder) (movies []Movie, err error) {
 	allMovies, err := c.GetMovies()
 	if err != nil {
 		return
@@ -159,7 +190,12 @@ func (c *Client) GetMovies() (movies []Movie, err error) {
 	if err != nil {
 		return
 	}
-	movies = *resp.Result().(*[]Movie)
+	allMovies := *resp.Result().(*[]Movie)
+	for _, movie := range allMovies {
+		if movie.Monitored {
+			movies = append(movies, movie)
+		}
+	}
 	return
 }
 

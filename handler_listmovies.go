@@ -30,7 +30,7 @@ type ListMoviesConversation struct {
 }
 
 func (c *ListMoviesConversation) Run(m *tb.Message) {
-	c.currentStep = c.AskFolder(m)
+	c.currentStep = c.AskFilter(m)
 }
 
 func (c *ListMoviesConversation) Name() string {
@@ -41,28 +41,99 @@ func (c *ListMoviesConversation) CurrentStep() Handler {
 	return c.currentStep
 }
 
+func (c *ListMoviesConversation) AskFilter(m *tb.Message) Handler {
+	var options []string
+	options = append(options, "All")
+	options = append(options, "Folder")
+	options = append(options, "Requester")
+	options = append(options, "/cancel")
+	SendKeyboardList(c.env.Bot, m.Sender, "Which movies would you like to list?", options)
+
+	return func(m *tb.Message) {
+		// Set the selected folder
+		for _, opt := range options {
+			if m.Text == opt {
+				if m.Text == "All" {
+					c.movieResults, _ = c.env.Radarr.GetMovies()
+					c.currentStep = c.AskMovie(m)
+				} else if m.Text == "Folder" {
+					c.currentStep = c.AskFolder(m)
+				} else if m.Text == "Requester" {
+					c.currentStep = c.AskRequester(m)
+				} else {
+					SendError(c.env.Bot, m.Sender, "Invalid selection.")
+					c.currentStep = c.AskFilter(m)
+					return
+				}
+			}
+		}
+	}
+}
+
+func (c *ListMoviesConversation) AskRequester(m *tb.Message) Handler {
+
+	requesterList, err := c.env.Radarr.GetTags()
+
+	if err != nil {
+		SendError(c.env.Bot, m.Sender, "Failed to get requester list.")
+		c.env.CM.StopConversation(c)
+		return nil
+	}
+
+	if len(requesterList) == 0 {
+		SendError(c.env.Bot, m.Sender, "No requester found.")
+		c.env.CM.StopConversation(c)
+		return nil
+	}
+
+	var options []string
+	options = append(options, "All")
+	for _, requester := range requesterList {
+		options = append(options, fmt.Sprintf("%s", requester.Label))
+	}
+
+	options = append(options, "/cancel")
+	SendKeyboardList(c.env.Bot, m.Sender, "Which movies would you like to list?", options)
+
+	return func(m *tb.Message) {
+		// Set the selected folder
+		for _, opt := range options {
+			if m.Text == opt {
+				if m.Text == "All" {
+					c.movieResults, _ = c.env.Radarr.GetMovies()
+				} else {
+					c.movieResults, err = c.env.Radarr.GetMoviesByRequester(m.Text)
+				}
+			}
+		}
+
+		if err != nil {
+			SendError(c.env.Bot, m.Sender, "Invalid selection.")
+			c.currentStep = c.AskRequester(m)
+			return
+		}
+
+		c.currentStep = c.AskMovie(m)
+	}
+}
+
 func (c *ListMoviesConversation) AskFolder(m *tb.Message) Handler {
 
 	folders, err := c.env.Radarr.GetFolders(true)
 	c.folderResults = folders
 
-	// GetFolders Service Failed
 	if err != nil {
 		SendError(c.env.Bot, m.Sender, "Failed to get folders.")
 		c.env.CM.StopConversation(c)
 		return nil
 	}
 
-	// No Results
 	if len(folders) == 0 {
 		SendError(c.env.Bot, m.Sender, "No destination folders found.")
 		c.env.CM.StopConversation(c)
 		return nil
 	}
 
-	// Found folders!
-
-	// Send the results
 	var msg []string
 	msg = append(msg, "*Available folders:*")
 	for _, folder := range folders {
@@ -101,12 +172,13 @@ func (c *ListMoviesConversation) AskFolder(m *tb.Message) Handler {
 			c.currentStep = c.AskFolder(m)
 			return
 		}
+
+		c.movieResults, _ = c.env.Radarr.GetMoviesByFolder(*c.selectedFolder)
 		c.currentStep = c.AskMovie(m)
 	}
 }
 
 func (c *ListMoviesConversation) AskMovie(m *tb.Message) Handler {
-	c.movieResults, _ = c.env.Radarr.GetMoviesFromFolder(*c.selectedFolder)
 
 	sort.Slice(c.movieResults, func(i, j int) bool {
 		return c.movieResults[i].Title < c.movieResults[j].Title
