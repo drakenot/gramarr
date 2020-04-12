@@ -1,9 +1,9 @@
 package main
 
 import (
-	"regexp"
-
 	tb "gopkg.in/tucnak/telebot.v2"
+	"regexp"
+	"strings"
 )
 
 var (
@@ -38,6 +38,12 @@ func (r *Router) HandleConvoFunc(cmd string, h ConvoHandler) {
 }
 
 func (r *Router) Route(m *tb.Message) {
+	split := strings.Split(m.Text, "_")
+	if len(split) == 2 {
+		m.Text = split[0]
+		m.Payload = split[1]
+	}
+
 	if !r.routeConvo(m) && !r.routeCommand(m) {
 		r.routeFallback(m)
 	}
