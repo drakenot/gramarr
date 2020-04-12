@@ -102,7 +102,8 @@ func setupHandlers(r *Router, e *Env) {
 	r.HandleFunc("/addtv", e.RequirePrivate(e.RequireAuth(UAMember, e.HandleAddTVShow)))
 	r.HandleFunc("/users", e.RequirePrivate(e.RequireAuth(UAAdmin, e.HandleUsers)))
 	r.HandleFunc("/status", e.RequirePrivate(e.RequireAuth(UAAdmin, e.HandleStatus)))
-	r.HandleFunc("/details", e.RequirePrivate(e.RequireAuth(UANone, e.HandleDetails)))
+	r.HandleFunc("/moviedetails", e.RequirePrivate(e.RequireAuth(UAMember, e.HandleDetails)))
+	r.HandleFunc("/deletemovie", e.RequirePrivate(e.RequireAuth(UAAdmin, e.HandleDelete)))
 
 	// Catchall Command
 	r.HandleFallback(e.RequirePrivate(e.RequireAuth(UANone, e.HandleFallback)))

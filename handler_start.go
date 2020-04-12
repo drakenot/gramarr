@@ -24,6 +24,8 @@ func (e *Env) HandleStart(m *tb.Message) {
 		msg = append(msg, "*Admin*")
 		msg = append(msg, "/users - list all bot users")
 		msg = append(msg, "/status - shows Sonarr/Radarr server status")
+		msg = append(msg, "/moviedetails {id} - shows movie details")
+		msg = append(msg, "/deletemovie {id} - deletes movie")
 	}
 
 	if exists && (user.IsMember() || user.IsAdmin()) {

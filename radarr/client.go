@@ -84,6 +84,11 @@ type Client struct {
 	client             *resty.Client
 }
 
+func (c *Client) DeleteMovie(movieId int) (err error) {
+	_, err = c.client.R().SetQueryParam("deleteFiles", "true").Delete("movie/" + strconv.Itoa(movieId))
+	return
+}
+
 func (c *Client) RemoveRequester(m Movie, requester string) (Movie, error) {
 	tag, err := c.GetTagByLabel(requester, true)
 	if err != nil {
