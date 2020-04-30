@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gramarr/radarr"
 	tb "gopkg.in/tucnak/telebot.v2"
-	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -30,7 +29,7 @@ type ListMoviesConversation struct {
 }
 
 func (c *ListMoviesConversation) Run(m *tb.Message) {
-	c.currentStep = c.AskFilter(m)
+	c.currentStep = c.AskRequester(m)
 }
 
 func (c *ListMoviesConversation) Name() string {
@@ -39,35 +38,6 @@ func (c *ListMoviesConversation) Name() string {
 
 func (c *ListMoviesConversation) CurrentStep() Handler {
 	return c.currentStep
-}
-
-func (c *ListMoviesConversation) AskFilter(m *tb.Message) Handler {
-	var options []string
-	options = append(options, "All")
-	options = append(options, "Folder")
-	options = append(options, "Requester")
-	options = append(options, "/cancel")
-	SendKeyboardList(c.env.Bot, m.Sender, "Which movies would you like to list?", options)
-
-	return func(m *tb.Message) {
-		// Set the selected folder
-		for _, opt := range options {
-			if m.Text == opt {
-				if m.Text == "All" {
-					c.movieResults, _ = c.env.Radarr.GetMovies()
-					c.currentStep = c.AskMovie(m)
-				} else if m.Text == "Folder" {
-					c.currentStep = c.AskFolder(m)
-				} else if m.Text == "Requester" {
-					c.currentStep = c.AskRequester(m)
-				} else {
-					SendError(c.env.Bot, m.Sender, "Invalid selection.")
-					c.currentStep = c.AskFilter(m)
-					return
-				}
-			}
-		}
-	}
 }
 
 func (c *ListMoviesConversation) AskRequester(m *tb.Message) Handler {
@@ -117,67 +87,6 @@ func (c *ListMoviesConversation) AskRequester(m *tb.Message) Handler {
 	}
 }
 
-func (c *ListMoviesConversation) AskFolder(m *tb.Message) Handler {
-
-	folders, err := c.env.Radarr.GetFolders(true)
-	c.folderResults = folders
-
-	if err != nil {
-		SendError(c.env.Bot, m.Sender, "Failed to get folders.")
-		c.env.CM.StopConversation(c)
-		return nil
-	}
-
-	if len(folders) == 0 {
-		SendError(c.env.Bot, m.Sender, "No destination folders found.")
-		c.env.CM.StopConversation(c)
-		return nil
-	}
-
-	var msg []string
-	msg = append(msg, "*Available folders:*")
-	for _, folder := range folders {
-		msg = append(msg, fmt.Sprintf("- %s", EscapeMarkdown(strings.Title(filepath.Base(folder.Path)))))
-	}
-	Send(c.env.Bot, m.Sender, strings.Join(msg, "\n"))
-
-	// Send the custom reply keyboard
-	var options []string
-	options = append(options, "All")
-	for _, folder := range folders {
-		options = append(options, fmt.Sprintf("%s", strings.Title(filepath.Base(folder.Path))))
-	}
-	options = append(options, "/cancel")
-	SendKeyboardList(c.env.Bot, m.Sender, "Which movies would you like to list?", options)
-
-	return func(m *tb.Message) {
-		// Set the selected folder
-		for i, opt := range options {
-			if m.Text == opt {
-				if m.Text == "All" {
-					c.selectedFolder = &radarr.Folder{
-						Path:      "",
-						FreeSpace: -1,
-						ID:        -1,
-					}
-				} else {
-					c.selectedFolder = &c.folderResults[i-1]
-				}
-				break
-			}
-		}
-
-		if c.selectedFolder == nil {
-			SendError(c.env.Bot, m.Sender, "Invalid selection.")
-			c.currentStep = c.AskFolder(m)
-			return
-		}
-
-		c.movieResults, _ = c.env.Radarr.GetMoviesByFolder(*c.selectedFolder)
-		c.currentStep = c.AskMovie(m)
-	}
-}
-
 func (c *ListMoviesConversation) AskMovie(m *tb.Message) Handler {
 
 	sort.Slice(c.movieResults, func(i, j int) bool {
@@ -207,7 +116,7 @@ func (c *ListMoviesConversation) AskMovie(m *tb.Message) Handler {
 		SendKeyboardList(c.env.Bot, m.Sender, "Select a movie for more details or send [/cancel]", options)
 	} else {
 		Send(c.env.Bot, m.Sender, "No movies found")
-		c.currentStep = c.AskFolder(m)
+		c.currentStep = c.AskRequester(m)
 	}
 
 	return func(m *tb.Message) {

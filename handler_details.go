@@ -66,7 +66,8 @@ func (c *DetailsConversation) showDetails(m *tb.Message) Handler {
 	} else {
 		msg = append(msg, "*Downloaded:* No")
 	}
-	msg = append(msg, fmt.Sprintf("*Requested by:* %s", strings.Join(c.env.Radarr.GetRequesterList(movie), ", ")))
+	requesterList := c.env.Radarr.GetRequesterList(movie)
+	msg = append(msg, fmt.Sprintf("*Requested by:* %s", strings.Join(requesterList, ", ")))
 
 	Send(c.env.Bot, m.Sender, strings.Join(msg, "\n"))
 
@@ -82,10 +83,19 @@ func (c *DetailsConversation) showDetails(m *tb.Message) Handler {
 		tag, _ := c.env.Radarr.GetTagById(t)
 		if tag.Label == strings.ToLower(username) {
 			options = append(options, "Remove yourself from the requester list")
+			break
 		}
 	}
 	if len(options) == 0 {
 		options = append(options, "Add yourself to the requester list")
+	}
+
+	user, exists := c.env.Users.User(m.Sender.ID)
+	if exists && user.IsAdmin() {
+		options = append(options, "/deletemovie_"+m.Payload)
+		//for requester := range requesterList {
+		//	options = append(options, "/removerequester_" + requester)
+		//}
 	}
 
 	options = append(options, "/cancel")
