@@ -86,7 +86,8 @@ func (c *DetailsConversation) showDetails(m *tb.Message) Handler {
 		if len(c.movie.Tags) > 0 {
 			options = append(options, "Remove requester")
 		}
-		options = append(options, "/deletemovie_"+m.Payload)
+		options = append(options, "Add requester")
+		options = append(options, fmt.Sprintf("/deletemovie_%s", m.Payload))
 	} else {
 		for _, t := range c.movie.Tags {
 			tag, _ := c.env.Radarr.GetTagById(t)
@@ -100,47 +101,74 @@ func (c *DetailsConversation) showDetails(m *tb.Message) Handler {
 		}
 	}
 
+	options = append(options, "/listmovies")
 	options = append(options, "/cancel")
-	SendKeyboardList(c.env.Bot, m.Sender, "Modify requester list", options)
+	SendKeyboardList(c.env.Bot, m.Sender, "Movie options", options)
 
 	return func(m *tb.Message) {
 		for _, opt := range options {
 			if m.Text == opt {
 				if m.Text == "Add yourself to the requester list" {
-					c.movie, err = c.env.Radarr.AddRequester(c.movie, username)
-					if err != nil {
-						Send(c.env.Bot, m.Sender, "Something went wrong. Please try again.")
-					} else {
-						Send(c.env.Bot, m.Sender, "You have been added to the requester list.")
-					}
+					c.addRequester(m, username)
 					break
 				} else if m.Text == "Remove yourself from the requester list" {
 					c.removeRequester(m, username)
 					break
 				} else if m.Text == "Remove requester" {
-
+					c.currentStep = c.askRemoveRequester(m)
+					break
+				} else if m.Text == "Add requester" {
+					c.currentStep = c.askAddRequester(m)
+					break
 				}
 			} else {
 				SendError(c.env.Bot, m.Sender, "Invalid selection.")
 			}
 		}
-		c.env.CM.StopConversation(c)
 	}
 }
 
 func (c *DetailsConversation) askRemoveRequester(m *tb.Message) Handler {
-	Send(c.env.Bot, m.Sender, "Remove user from requester list")
-
 	var options []string
 	for _, t := range c.movie.Tags {
-		tag, _ := c.env.Radarr.GetTagById(t)
-		options = append(options, fmt.Sprintf("Remove %s from the requester list"), tag.Label)
+		tag, err := c.env.Radarr.GetTagById(t)
+		if err == nil {
+			options = append(options, tag.Label)
+		}
 	}
+	options = append(options, "Back to details")
 	options = append(options, "/cancel")
-	SendKeyboardList(c.env.Bot, m.Sender, "Modify requester list", options)
+	SendKeyboardList(c.env.Bot, m.Sender, "Remove user from requester list", options)
 
 	return func(m *tb.Message) {
-		c.removeRequester(m, m.Text)
+		if m.Text != "Back to details" {
+			c.removeRequester(m, m.Text)
+		}
+		c.currentStep = c.showDetails(m)
+		c.showDetails(m)
+	}
+}
+
+func (c *DetailsConversation) askAddRequester(m *tb.Message) Handler {
+	tags, err := c.env.Radarr.GetTags()
+	var options []string
+	if err == nil {
+		for _, t := range tags {
+			options = append(options, t.Label)
+		}
+	} else {
+		SendError(c.env.Bot, m.Sender, "Could not retrieve tag list")
+	}
+	options = append(options, "Back to details")
+	options = append(options, "/cancel")
+	SendKeyboardList(c.env.Bot, m.Sender, "Add user from requester list", options)
+
+	return func(m *tb.Message) {
+		if m.Text != "Back to details" {
+			c.addRequester(m, m.Text)
+		}
+		c.currentStep = c.showDetails(m)
+		c.showDetails(m)
 	}
 }
 
@@ -154,6 +182,16 @@ func (c *DetailsConversation) removeRequester(m *tb.Message, requester string) {
 				fmt.Sprintf("'%s' was the last requester of the movie '%s (%d)'. Send /deletemovie\\_%d to delete it from disk.",
 					requester, EscapeMarkdown(c.movie.Title), c.movie.Year, c.movie.ID))
 		}
+	} else {
+		Send(c.env.Bot, m.Sender, "Something went wrong. Please try again.")
+	}
+}
+
+func (c *DetailsConversation) addRequester(m *tb.Message, requester string) {
+	var err error
+	c.movie, err = c.env.Radarr.AddRequester(c.movie, requester)
+	if err == nil {
+		Send(c.env.Bot, m.Sender, fmt.Sprintf("%s has been added to the requester list.", requester))
 	} else {
 		Send(c.env.Bot, m.Sender, "Something went wrong. Please try again.")
 	}
