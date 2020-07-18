@@ -1,4 +1,4 @@
-# gramarr
+#gramarr
 ## A [Radarr](https://github.com/Radarr/Radarr) and [Sonarr](https://github.com/Sonarr/Sonarr) Telegram Bot featuring user authentication/level access.
 
 ![Grammar](https://extraimage.com/images/2020/02/06/gramarr.jpg)
@@ -34,7 +34,7 @@
 - Copy the `config.json.template` file to `config.json` and set-up your configuration;
 
 #### If running from downloaded binaries
-- Put the copied `config.json` alongside with the binary downloaded from [releases](https://github.com/alcmoraes/gramarr/releases);
+- Put the copied `config.json` alongside with the binary downloaded from [releases](https://github.com/drakenot/gramarr/releases);
 
 ## Running it
 
@@ -42,15 +42,15 @@
 ### From source
 
 ```bash
-$ go get github.com/alcmoraes/gramarr
-$ cd $GOPATH/src/github.com/alcmoraes/gramarr
+$ go get github.com/drakenot/gramarr
+$ cd $GOPATH/src/github.com/drakenot/gramarr
 $ go get
 $ go run .
 ```
 
 ### From release
 
-Just [download](https://github.com/alcmoraes/gramarr/releases/latest) the respective binary for your System.
+Just [download](https://github.com/drakenot/gramarr/releases/latest) the respective binary for your System.
 
 *Obs: Don't forget to put the `config.json` in the same folder as the binary file.*
 
