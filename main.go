@@ -2,11 +2,14 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/drakenot/gramarr/radarr"
+	"github.com/alcmoraes/gramarr/radarr"
+	"github.com/alcmoraes/gramarr/sonarr"
 
 	tb "gopkg.in/tucnak/telebot.v2"
 )
@@ -22,6 +25,7 @@ type Env struct {
 	Bot    *tb.Bot
 	CM     *ConversationManager
 	Radarr *radarr.Client
+	Sonarr *sonarr.Client
 }
 
 func main() {
@@ -51,6 +55,14 @@ func main() {
 		}
 	}
 
+	var sn *sonarr.Client
+	if conf.Sonarr != nil {
+		sn, err = sonarr.NewClient(*conf.Sonarr)
+		if err != nil {
+			log.Fatalf("failed to create sonarr client: %v", err)
+		}
+	}
+
 	cm := NewConversationManager()
 	router := NewRouter(cm)
 
@@ -69,9 +81,11 @@ func main() {
 		Users:  users,
 		CM:     cm,
 		Radarr: rc,
+		Sonarr: sn,
 	}
 
 	setupHandlers(router, env)
+	fmt.Fprintf(os.Stdout, "Gramarr is up and running. Go call your bot!\n")
 	bot.Start()
 }
 
@@ -85,6 +99,7 @@ func setupHandlers(r *Router, e *Env) {
 	r.HandleFunc("/help", e.RequirePrivate(e.RequireAuth(UANone, e.HandleStart)))
 	r.HandleFunc("/cancel", e.RequirePrivate(e.RequireAuth(UANone, e.HandleCancel)))
 	r.HandleFunc("/addmovie", e.RequirePrivate(e.RequireAuth(UAMember, e.HandleAddMovie)))
+	r.HandleFunc("/addtv", e.RequirePrivate(e.RequireAuth(UAMember, e.HandleAddTVShow)))
 	r.HandleFunc("/users", e.RequirePrivate(e.RequireAuth(UAAdmin, e.HandleUsers)))
 
 	// Catchall Command

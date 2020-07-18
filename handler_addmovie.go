@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/drakenot/gramarr/radarr"
+	"github.com/alcmoraes/gramarr/radarr"
+
+	"path/filepath"
 
 	tb "gopkg.in/tucnak/telebot.v2"
-	"path/filepath"
 )
 
 func (e *Env) HandleAddMovie(m *tb.Message) {
@@ -19,13 +20,13 @@ func NewAddMovieConversation(e *Env) *AddMovieConversation {
 }
 
 type AddMovieConversation struct {
-	currentStep    Handler
-	movieQuery     string
-	movieResults   []radarr.Movie
-	folderResults  []radarr.Folder
-	selectedMovie  *radarr.Movie
-	selectedFolder *radarr.Folder
-	env            *Env
+	currentStep            Handler
+	movieQuery             string
+	movieResults           []radarr.Movie
+	folderResults          []radarr.Folder
+	selectedMovie          *radarr.Movie
+	selectedFolder         *radarr.Folder
+	env                    *Env
 }
 
 func (c *AddMovieConversation) Run(m *tb.Message) {
