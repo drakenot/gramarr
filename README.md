@@ -22,11 +22,6 @@
 
 - [Go](https://golang.org/)
 
-### If running from docker
-
-- [Docker](https://docker.io)
-- [Docker Compose](https://docs.docker.com/compose/)
-
 ## Configuration
 
 - Copy the `config.json.template` file to `config.json` and set-up your configuration;
