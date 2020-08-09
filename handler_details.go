@@ -82,48 +82,54 @@ func (c *DetailsConversation) showDetails(m *tb.Message) Handler {
 
 	var options []string
 	user, exists := c.env.Users.User(m.Sender.ID)
-	if exists && user.IsAdmin() {
-		if len(c.movie.Tags) > 0 {
-			options = append(options, "Remove requester")
-		}
-		options = append(options, "Add requester")
-		options = append(options, fmt.Sprintf("/deletemovie_%s", m.Payload))
-	} else {
-		for _, t := range c.movie.Tags {
-			tag, _ := c.env.Radarr.GetTagById(t)
-			if tag.Label == strings.ToLower(username) {
-				options = append(options, "Remove yourself from the requester list")
-				break
+	if exists {
+		if user.IsAdmin() {
+			if len(c.movie.Tags) > 0 {
+				options = append(options, "Remove requester")
 			}
-		}
-		if len(options) == 0 {
-			options = append(options, "Add yourself to the requester list")
+			options = append(options, "Add requester")
+			options = append(options, "Delete Movie")
+		} else {
+			for _, t := range c.movie.Tags {
+				tag, _ := c.env.Radarr.GetTagById(t)
+				if tag.Label == strings.ToLower(username) {
+					options = append(options, "Remove yourself from the requester list")
+					break
+				}
+			}
+			if len(options) == 0 {
+				options = append(options, "Add yourself to the requester list")
+			}
 		}
 	}
 
-	options = append(options, "/listmovies")
+	options = append(options, "Back to movie list")
 	options = append(options, "/cancel")
-	SendKeyboardList(c.env.Bot, m.Sender, "Movie options", options)
+	SendKeyboardList(c.env.Bot, m.Sender, "Choose an option for this movie", options)
 
 	return func(m *tb.Message) {
-		for _, opt := range options {
-			if m.Text == opt {
-				if m.Text == "Add yourself to the requester list" {
-					c.addRequester(m, username)
-					break
-				} else if m.Text == "Remove yourself from the requester list" {
-					c.removeRequester(m, username)
-					break
-				} else if m.Text == "Remove requester" {
-					c.currentStep = c.askRemoveRequester(m)
-					break
-				} else if m.Text == "Add requester" {
-					c.currentStep = c.askAddRequester(m)
-					break
-				}
+		switch m.Text {
+		case "Add yourself to the requester list":
+			c.addRequester(m, username)
+		case "Remove yourself from the requester list":
+			c.removeRequester(m, username)
+		case "Remove requester":
+			c.currentStep = c.askRemoveRequester(m)
+		case "Add requester":
+			c.currentStep = c.askAddRequester(m)
+		case "Back to movie list":
+			c.env.HandleListMovies(m)
+			c.env.CM.StopConversation(c)
+		case "Delete Movie":
+			err = c.env.Radarr.DeleteMovie(movieId)
+			if err == nil {
+				Send(c.env.Bot, m.Sender, fmt.Sprintf("Movie '%s (%d)' has been deleted.", EscapeMarkdown(c.movie.Title), c.movie.Year))
 			} else {
-				SendError(c.env.Bot, m.Sender, "Invalid selection.")
+				SendError(c.env.Bot, m.Sender, "Could not delete movie. Please try again.")
 			}
+		default:
+			SendError(c.env.Bot, m.Sender, "Invalid selection.")
+			SendKeyboardList(c.env.Bot, m.Sender, "Choose an option for this movie", options)
 		}
 	}
 }
@@ -144,8 +150,8 @@ func (c *DetailsConversation) askRemoveRequester(m *tb.Message) Handler {
 		if m.Text != "Back to details" {
 			c.removeRequester(m, m.Text)
 		}
+		m.Payload = strconv.Itoa(c.movie.ID)
 		c.currentStep = c.showDetails(m)
-		c.showDetails(m)
 	}
 }
 
@@ -167,8 +173,8 @@ func (c *DetailsConversation) askAddRequester(m *tb.Message) Handler {
 		if m.Text != "Back to details" {
 			c.addRequester(m, m.Text)
 		}
+		m.Payload = strconv.Itoa(c.movie.ID)
 		c.currentStep = c.showDetails(m)
-		c.showDetails(m)
 	}
 }
 

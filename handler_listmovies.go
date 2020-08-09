@@ -112,14 +112,19 @@ func (c *ListMoviesConversation) AskMovie(m *tb.Message) Handler {
 	}
 
 	if len(options) > 0 {
+		options = append(options, "Back to requester selection")
 		options = append(options, "/cancel")
-		SendKeyboardList(c.env.Bot, m.Sender, "Select a movie for more details or send [/cancel]", options)
+		SendKeyboardList(c.env.Bot, m.Sender, "Select a movie for more details", options)
 	} else {
 		Send(c.env.Bot, m.Sender, "No movies found")
 		c.currentStep = c.AskRequester(m)
 	}
 
 	return func(m *tb.Message) {
+		if m.Text == "Back to requester selection" {
+			c.currentStep = c.AskRequester(m)
+			return
+		}
 
 		// Set the selected movie
 		for i, opt := range options {
