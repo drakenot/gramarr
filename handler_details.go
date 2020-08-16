@@ -121,7 +121,7 @@ func (c *DetailsConversation) showDetails(m *tb.Message) Handler {
 			c.env.HandleListMovies(m)
 			c.env.CM.StopConversation(c)
 		case "Delete Movie":
-			err = c.env.Radarr.DeleteMovie(movieId)
+			err = c.env.Radarr.DeleteMovie(c.movie.ID)
 			if err == nil {
 				Send(c.env.Bot, m.Sender, fmt.Sprintf("Movie '%s (%d)' has been deleted.", EscapeMarkdown(c.movie.Title), c.movie.Year))
 			} else {
