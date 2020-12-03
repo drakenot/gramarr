@@ -10,8 +10,10 @@ RUN go get
 
 RUN mkdir -p /app
 
+RUN mkdir -p /config
+
 RUN go build -o /app/gramarr
 
-COPY config.json /app/config.json
+COPY config.json.template /config/config.json
 
-CMD ["/app/gramarr", "-configDir=/app"]
+CMD ["/app/gramarr", "-configDir=/config"]
