@@ -127,6 +127,7 @@ func (c *Client) AddTVShow(m TVShow, qualityProfile int, path string) (tvShow TV
 		Monitored:         true,
 		Year:              m.Year,
 		Seasons:           m.Seasons,
+		QualityProfileID:  qualityProfile,
 		AddOptions:        AddTVShowOptions{SearchForMissingEpisodes: true},
 	}
 
