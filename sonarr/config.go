@@ -10,5 +10,4 @@ type Config struct {
 	Password   	string `json:"password"`
 	MaxResults 	int    `json:"maxResults"`
 	QualityID  	int    `json:"qualityId"`
-	SeasonFolder	bool   `json:"seasonFolder"`
 }

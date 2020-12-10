@@ -53,6 +53,7 @@ type AddTVShowRequest struct {
 	AddOptions        AddTVShowOptions `json:"addOptions"`
 	Year              int              `json:"year"`
 	Seasons           []*TVShowSeason  `json:"seasons"`
+	SeasonFolder	  bool		   `json:"seasonFolder"`
 }
 
 type AddTVShowOptions struct {
