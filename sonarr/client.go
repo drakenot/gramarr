@@ -129,7 +129,7 @@ func (c *Client) AddTVShow(m TVShow, qualityProfile int, path string) (tvShow TV
 		Seasons:           m.Seasons,
 		QualityProfileID:  qualityProfile,
 		AddOptions:        AddTVShowOptions{SearchForMissingEpisodes: true},
-		SeasonFolder:	   true
+		SeasonFolder:	   true,
 	}
 
 	resp, err := c.client.R().SetBody(request).SetResult(TVShow{}).Post("series")
