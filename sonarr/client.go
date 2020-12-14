@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"gopkg.in/resty.v1"
+	"github.com/go-resty/resty/v2"
 )
 
 var (
@@ -40,6 +40,10 @@ func NewClient(c Config) (*Client, error) {
 		baseURL:    baseURL,
 		client:     r,
 	}
+
+	// Assign Client Redirect Policy. Create one as per you need
+	client.client.SetRedirectPolicy(resty.FlexibleRedirectPolicy(15))
+
 	return &client, nil
 }
 
@@ -116,23 +120,67 @@ func (c *Client) GetProfile(prfl string) ([]Profile, error) {
 
 }
 
-func (c *Client) AddTVShow(m TVShow, qualityProfile int, path string) (tvShow TVShow, err error) {
+func (c *Client) GetTVShows() ([]TVShow, error) {
 
-	request := AddTVShowRequest{
-		Title:             m.Title,
-		TitleSlug:         m.TitleSlug,
-		Images:            m.Images,
-		TVDBID:            m.TVDBID,
-		RootFolderPath:    path,
-		Monitored:         true,
-		Year:              m.Year,
-		Seasons:           m.Seasons,
-		QualityProfileID:  qualityProfile,
-		AddOptions:        AddTVShowOptions{SearchForMissingEpisodes: true},
-		SeasonFolder:	   true,
+	resp, err := c.client.R().SetResult([]TVShow{}).Get("series")
+
+	if err != nil {
+		return nil, err
 	}
 
-	resp, err := c.client.R().SetBody(request).SetResult(TVShow{}).Post("series")
+	shows := *resp.Result().(*[]TVShow)
+
+	return shows, nil
+}
+
+func (c *Client) AddTVShow(m TVShow, qualityProfile int, path string) (tvShow TVShow, err error) {
+
+	// Check if the show exists
+	shows, err := c.GetTVShows()
+
+	var match *TVShow
+
+	for _, show := range shows {
+
+		if show.TVDBID == m.TVDBID {
+			match = &show
+			break
+		}
+	}
+
+	var resp *resty.Response
+
+	if match != nil {
+		for i := 0; i < len(match.Seasons); i++ {
+			for j := 0; j < len(m.Seasons); j++ {
+				if m.Seasons[j].SeasonNumber != match.Seasons[i].SeasonNumber {
+					continue
+				}
+
+				if m.Seasons[j].Monitored {
+					match.Seasons[i].Monitored = true
+				}
+			}
+		}
+		resp, err = c.client.R().SetBody(match).SetResult(TVShow{}).Put("series")
+	} else {
+		request := AddTVShowRequest{
+			Title:            m.Title,
+			TitleSlug:        m.TitleSlug,
+			Images:           m.Images,
+			TVDBID:           m.TVDBID,
+			RootFolderPath:   path,
+			Monitored:        true,
+			Year:             m.Year,
+			Seasons:          m.Seasons,
+			QualityProfileID: qualityProfile,
+			AddOptions:       AddTVShowOptions{SearchForMissingEpisodes: true},
+			SeasonFolder:     true,
+		}
+
+		resp, err = c.client.R().SetBody(request).SetResult(TVShow{}).Post("series")
+	}
+
 	if err != nil {
 		fmt.Println(err)
 		return

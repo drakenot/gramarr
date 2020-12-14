@@ -2,6 +2,7 @@ gramarr
 users.json
 config.json
 
+.vscode/
 .idea/
 
 # Binaries for programs and plugins
