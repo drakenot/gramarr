@@ -133,7 +133,7 @@ func (c *Client) GetTVShows() ([]TVShow, error) {
 	return shows, nil
 }
 
-func (c *Client) AddTVShow(m TVShow, qualityProfile int, path string) (tvShow TVShow, err error) {
+func (c *Client) AddTVShow(m TVShow, s []*TVShowSeason, qualityProfile int, path string) (tvShow TVShow, err error) {
 
 	// Check if the show exists
 	shows, err := c.GetTVShows()
@@ -151,19 +151,33 @@ func (c *Client) AddTVShow(m TVShow, qualityProfile int, path string) (tvShow TV
 	var resp *resty.Response
 
 	if match != nil {
+		// merge selected list to the existing show in Sonarr
 		for i := 0; i < len(match.Seasons); i++ {
-			for j := 0; j < len(m.Seasons); j++ {
-				if m.Seasons[j].SeasonNumber != match.Seasons[i].SeasonNumber {
+			for j := 0; j < len(s); j++ {
+				if s[j].SeasonNumber != match.Seasons[i].SeasonNumber {
 					continue
 				}
-
-				if m.Seasons[j].Monitored {
-					match.Seasons[i].Monitored = true
-				}
+				match.Seasons[i].Monitored = true
 			}
 		}
 		resp, err = c.client.R().SetBody(match).SetResult(TVShow{}).Put("series")
 	} else {
+
+		// clear out monitored status for all seasons
+		for i := 0; i < len(m.Seasons); i++ {
+			m.Seasons[i].Monitored = false
+		}
+
+		// merge the selected list to list of all seasons
+		for i := 0; i < len(m.Seasons); i++ {
+			for j := 0; j < len(s); j++ {
+				if s[j].SeasonNumber != m.Seasons[i].SeasonNumber {
+					continue
+				}
+				m.Seasons[i].Monitored = true
+			}
+		}
+
 		request := AddTVShowRequest{
 			Title:            m.Title,
 			TitleSlug:        m.TitleSlug,

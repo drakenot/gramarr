@@ -53,6 +53,8 @@ func (c *AddTVShowConversation) AskTVShow(m *tb.Message) Handler {
 		TVShows, err := c.env.Sonarr.SearchTVShows(c.TVQuery)
 		c.TVShowResults = TVShows
 
+		// TODO merge lookup with existing series and set the monitored status correctly
+
 		// Search Service Failed
 		if err != nil {
 			fmt.Println(err)
@@ -152,21 +154,22 @@ func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) Handler {
 		if m.Text == "Nope. I'm done!" {
 
 			// merge selected seasons
-			for i := 0; i < len(c.selectedTVShow.Seasons); i++ {
-				for j := 0; j < len(c.selectedTVShowSeasons); j++ {
-					if c.selectedTVShowSeasons[j].SeasonNumber != c.selectedTVShow.Seasons[i].SeasonNumber {
-						continue
-					}
+			// for i := 0; i < len(c.selectedTVShow.Seasons); i++ {
+			// 	for j := 0; j < len(c.selectedTVShowSeasons); j++ {
+			// 		if c.selectedTVShowSeasons[j].SeasonNumber != c.selectedTVShow.Seasons[i].SeasonNumber {
+			// 			continue
+			// 		}
 
-					if c.selectedTVShowSeasons[j].Monitored {
-						c.selectedTVShow.Seasons[i].Monitored = true
-					}
-				}
-			}
+			// 		if c.selectedTVShowSeasons[j].Monitored {
+			// 			c.selectedTVShow.Seasons[i].Monitored = true
+			// 		}
+			// 	}
+			// }
 
-			c.selectedTVShowSeasons = c.selectedTVShow.Seasons
+			// c.selectedTVShow.Seasons = c.selectedTVShowSeasons
 
 			c.currentStep = c.AskFolder(m)
+
 			return
 		} else {
 			var selectedSeason *sonarr.TVShowSeason
@@ -248,7 +251,7 @@ func (c *AddTVShowConversation) AskFolder(m *tb.Message) Handler {
 }
 
 func (c *AddTVShowConversation) AddTVShow(m *tb.Message) {
-	_, err := c.env.Sonarr.AddTVShow(*c.selectedTVShow, c.env.Config.Sonarr.QualityID, c.selectedFolder.Path)
+	_, err := c.env.Sonarr.AddTVShow(*c.selectedTVShow, c.selectedTVShowSeasons, c.env.Config.Sonarr.QualityID, c.selectedFolder.Path)
 
 	// Failed to add TV
 	if err != nil {
