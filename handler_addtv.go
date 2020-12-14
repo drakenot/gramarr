@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/drakenot/gramarr/sonarr"
@@ -25,7 +26,7 @@ type AddTVShowConversation struct {
 	TVShowResults           []sonarr.TVShow
 	folderResults           []sonarr.Folder
 	selectedTVShow          *sonarr.TVShow
-	selectedTVShowSeasons   []sonarr.TVShowSeason
+	selectedTVShowSeasons   []*sonarr.TVShowSeason
 	selectedLanguageProfile *sonarr.Profile
 	selectedFolder          *sonarr.Folder
 	env                     *Env
@@ -54,7 +55,7 @@ func (c *AddTVShowConversation) AskTVShow(m *tb.Message) Handler {
 
 		// Search Service Failed
 		if err != nil {
-			fmt.Println(err);
+			fmt.Println(err)
 			SendError(c.env.Bot, m.Sender, "Failed to search TV Show.")
 			c.env.CM.StopConversation(c)
 			return
@@ -110,28 +111,35 @@ func (c *AddTVShowConversation) AskPickTVShow(m *tb.Message) Handler {
 	}
 }
 
+func (c *AddTVShowConversation) isSelectedSeason(s *sonarr.TVShowSeason) bool {
+
+	for _, season := range c.selectedTVShowSeasons {
+		if s.SeasonNumber == season.SeasonNumber {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) Handler {
+
+	if c.selectedTVShowSeasons == nil {
+		c.selectedTVShowSeasons = []*sonarr.TVShowSeason{}
+	}
 
 	// Send custom reply keyboard
 	var options []string
 	if len(c.selectedTVShowSeasons) > 0 {
 		options = append(options, "Nope. I'm done!")
 	}
-	for _, Season := range c.selectedTVShow.Seasons {
-		if len(c.selectedTVShowSeasons) > 0 {
-			show := true
-			for _, TVShowSeason := range c.selectedTVShowSeasons {
-				if TVShowSeason.SeasonNumber == Season.SeasonNumber {
-					show = false
-				}
-			}
-			if show {
-				options = append(options, fmt.Sprintf("%v", Season.SeasonNumber))
-			}
-		} else {
-			options = append(options, fmt.Sprintf("%v", Season.SeasonNumber))
+
+	for _, season := range c.selectedTVShow.Seasons {
+		if !c.isSelectedSeason(season) && season.SeasonNumber > 0 {
+			options = append(options, fmt.Sprintf("%v", season.SeasonNumber))
 		}
 	}
+
 	options = append(options, "/cancel")
 	if len(c.selectedTVShowSeasons) > 0 {
 		SendKeyboardList(c.env.Bot, m.Sender, "Any other season?", options)
@@ -142,37 +150,45 @@ func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) Handler {
 	return func(m *tb.Message) {
 
 		if m.Text == "Nope. I'm done!" {
-			for _, selectedTVShowSeason := range c.selectedTVShow.Seasons {
-				selectedTVShowSeason.Monitored = false
-				for _, chosenSeason := range c.selectedTVShowSeasons {
-					if chosenSeason.SeasonNumber == selectedTVShowSeason.SeasonNumber {
-						selectedTVShowSeason.Monitored = true
+
+			// merge selected seasons
+			for i := 0; i < len(c.selectedTVShow.Seasons); i++ {
+				for j := 0; j < len(c.selectedTVShowSeasons); j++ {
+					if c.selectedTVShowSeasons[j].SeasonNumber != c.selectedTVShow.Seasons[i].SeasonNumber {
+						continue
+					}
+
+					if c.selectedTVShowSeasons[j].Monitored {
+						c.selectedTVShow.Seasons[i].Monitored = true
 					}
 				}
 			}
+
+			c.selectedTVShowSeasons = c.selectedTVShow.Seasons
+
 			c.currentStep = c.AskFolder(m)
 			return
-		}
+		} else {
+			var selectedSeason *sonarr.TVShowSeason
 
-		// Set the selected TV
-		for i := range options {
-			if m.Text == options[i] {
-				c.selectedTVShowSeasons = append(c.selectedTVShowSeasons, *c.selectedTVShow.Seasons[i])
-				break
+			// Set the selected TV
+			i, err := strconv.Atoi(m.Text)
+			if err == nil && i < len(c.selectedTVShow.Seasons) && i > 0 {
+				selectedSeason = c.selectedTVShow.Seasons[i]
 			}
-		}
 
-		// Not a valid TV selection
-		if c.selectedTVShowSeasons == nil {
-			SendError(c.env.Bot, m.Sender, "Invalid selection.")
+			// Not a valid TV selection
+			if selectedSeason == nil {
+				SendError(c.env.Bot, m.Sender, "Invalid selection.")
+				c.currentStep = c.AskPickTVShowSeason(m)
+				return
+			}
+
+			c.selectedTVShowSeasons = append(c.selectedTVShowSeasons, selectedSeason)
 			c.currentStep = c.AskPickTVShowSeason(m)
-			return
 		}
-
-		c.currentStep = c.AskPickTVShowSeason(m)
 	}
 }
-
 
 func (c *AddTVShowConversation) AskFolder(m *tb.Message) Handler {
 

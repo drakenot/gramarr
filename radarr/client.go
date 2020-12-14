@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"gopkg.in/resty.v1"
+	"github.com/go-resty/resty/v2"
 )
 
 var (
@@ -40,6 +40,11 @@ func NewClient(c Config) (*Client, error) {
 		baseURL:    baseURL,
 		client:     r,
 	}
+
+	// Assign Client Redirect Policy. Create one as per you need
+	client.client.SetRedirectPolicy(resty.FlexibleRedirectPolicy(15))
+
+	// client.client.EnableTrace()
 	return &client, nil
 }
 
@@ -131,6 +136,7 @@ func (c *Client) AddMovie(m Movie, qualityProfile int, path string) (movie Movie
 	}
 
 	resp, err := c.client.R().SetBody(request).SetResult(Movie{}).Post("movie")
+
 	if err != nil {
 		return
 	}
