@@ -176,8 +176,13 @@ func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) Handler {
 
 			// Set the selected TV
 			i, err := strconv.Atoi(m.Text)
-			if err == nil && i < len(c.selectedTVShow.Seasons) && i > 0 {
-				selectedSeason = c.selectedTVShow.Seasons[i]
+			if err == nil && i <= len(c.selectedTVShow.Seasons) && i > 0 {
+				for _, season := range c.selectedTVShow.Seasons {
+					if i == season.SeasonNumber {
+						selectedSeason = season
+						break
+					}
+				}
 			}
 
 			// Not a valid TV selection
