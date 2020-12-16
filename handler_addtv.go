@@ -151,13 +151,22 @@ func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) Handler {
 		options = append(options, "Nope. I'm done!")
 	}
 
+	var seasonCount int = 0
 	for _, season := range c.selectedTVShow.Seasons {
 		if !c.isSelectedSeason(season) && season.SeasonNumber > 0 && !season.Monitored {
 			options = append(options, fmt.Sprintf("%v", season.SeasonNumber))
+			seasonCount++
 		}
 	}
 
+	if seasonCount == 0 && len(c.selectedTVShowSeasons) == 0 {
+		SendError(c.env.Bot, m.Sender, "No seasons left in this show to add.")
+		c.env.CM.StopConversation(c)
+		return nil
+	}
+
 	options = append(options, "/cancel")
+
 	if len(c.selectedTVShowSeasons) > 0 {
 		SendKeyboardList(c.env.Bot, m.Sender, "Any other season?", options)
 	} else {
