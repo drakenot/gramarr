@@ -134,6 +134,7 @@ func (c *Client) AddTVShow(m TVShow, languageProfile int, qualityProfile int, pa
 		TVDBID:            m.TVDBID,
 		RootFolderPath:    path,
 		Monitored:         true,
+		SeasonFolder:      true,
 		Year:              m.Year,
 		Seasons:           m.Seasons,
 		AddOptions:        AddTVShowOptions{SearchForMissingEpisodes: true},

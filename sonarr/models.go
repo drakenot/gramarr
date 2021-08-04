@@ -52,6 +52,7 @@ type AddTVShowRequest struct {
 	TVDBID            int              `json:"tvdbId"`
 	RootFolderPath    string           `json:"rootFolderPath"`
 	Monitored         bool             `json:"monitored"`
+	SeasonFolder      bool             `json:"seasonFolder"`
 	AddOptions        AddTVShowOptions `json:"addOptions"`
 	Year              int              `json:"year"`
 	Seasons           []*TVShowSeason  `json:"seasons"`
