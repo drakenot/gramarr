@@ -114,7 +114,7 @@ func (c *AddMovieConversation) AskPickMovie(m *tb.Message) Handler {
 		}
 		if existingMovie.ID > 0 {
 			Send(c.env.Bot, m.Sender, "This movie has already been requested. You will be added to the requester list")
-			_, _ = c.env.Radarr.AddRequester(existingMovie, m.Sender.FirstName)
+			_, _ = c.env.Radarr.AddRequester(existingMovie, GetUserName(m))
 			m.Payload = strconv.Itoa(c.selectedMovie.ID)
 			c.env.HandleDetails(m)
 
@@ -231,7 +231,7 @@ func (c *AddMovieConversation) AskFolder(m *tb.Message) Handler {
 }
 
 func (c *AddMovieConversation) AddMovie(m *tb.Message) {
-	_, err := c.env.Radarr.AddMovie(*c.selectedMovie, c.selectedQualityProfile.ID, c.selectedFolder.Path, m.Sender.FirstName)
+	_, err := c.env.Radarr.AddMovie(*c.selectedMovie, c.selectedQualityProfile.ID, c.selectedFolder.Path, GetUserName(m))
 
 	// Failed to add movie
 	if err != nil {

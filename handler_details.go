@@ -73,12 +73,7 @@ func (c *DetailsConversation) showDetails(m *tb.Message) Handler {
 
 	Send(c.env.Bot, m.Sender, strings.Join(msg, "\n"))
 
-	var username string
-	if len(m.Sender.Username) > 0 {
-		username = m.Sender.Username
-	} else {
-		username = m.Sender.FirstName
-	}
+	var username = GetUserName(m)
 
 	var options []string
 	user, exists := c.env.Users.User(m.Sender.ID)
@@ -92,7 +87,7 @@ func (c *DetailsConversation) showDetails(m *tb.Message) Handler {
 		} else {
 			for _, t := range c.movie.Tags {
 				tag, _ := c.env.Radarr.GetTagById(t)
-				if tag.Label == strings.ToLower(username) {
+				if tag.Label == username {
 					options = append(options, "Remove yourself from the requester list")
 					break
 				}
