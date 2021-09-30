@@ -59,7 +59,7 @@ func (c *ListMoviesConversation) AskRequester(m *tb.Message) Handler {
 	var options []string
 	options = append(options, "All")
 	for _, requester := range requesterList {
-		options = append(options, fmt.Sprintf("%s", requester.Label))
+		options = append(options, fmt.Sprintf("%s", strings.TrimSpace(requester.Label)))
 	}
 
 	options = append(options, "/cancel")
@@ -72,7 +72,7 @@ func (c *ListMoviesConversation) AskRequester(m *tb.Message) Handler {
 				if m.Text == "All" {
 					c.movieResults, _ = c.env.Radarr.GetMovies()
 				} else {
-					c.movieResults, err = c.env.Radarr.GetMoviesByRequester(m.Text)
+					c.movieResults, err = c.env.Radarr.GetMoviesByRequester(strings.TrimSpace(m.Text))
 				}
 			}
 		}

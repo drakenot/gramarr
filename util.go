@@ -91,5 +91,5 @@ func GetUserName(m *tb.Message) string {
 	} else {
 		username = fmt.Sprintf("%s %s", m.Sender.FirstName, m.Sender.LastName)
 	}
-	return strings.ToLower(username)
+	return strings.TrimSpace(strings.ToLower(username))
 }

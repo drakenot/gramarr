@@ -169,7 +169,7 @@ func (c *Client) GetMoviesByRequester(requester string) (movies []Movie, err err
 	for _, movie := range allMovies {
 		for _, t := range movie.Tags {
 			tag, _ := c.GetTagById(t)
-			if requester == tag.Label {
+			if strings.Trim(requester, " ") == strings.Trim(tag.Label, " ") {
 				movies = append(movies, movie)
 			}
 		}
@@ -282,12 +282,12 @@ func (c *Client) GetTagByLabel(label string, createNew bool) (movieTag MovieTag,
 		return
 	}
 	for _, tag := range tags {
-		if strings.EqualFold(label, tag.Label) {
+		if strings.EqualFold(strings.TrimSpace(label), strings.TrimSpace(tag.Label)) {
 			movieTag = tag
 		}
 	}
 	if createNew && movieTag.Id == 0 {
-		movieTag, err = c.CreateTag(label)
+		movieTag, err = c.CreateTag(strings.TrimSpace(label))
 	}
 	return
 }
@@ -315,6 +315,7 @@ func (c *Client) GetTags() (tags []MovieTag, err error) {
 }
 
 func (c *Client) CreateTag(label string) (tag MovieTag, err error) {
+	label = strings.TrimSpace(label)
 	resp, err := c.client.R().SetBody(MovieTag{Label: label}).SetResult(MovieTag{}).Post("tag")
 	if err != nil {
 		return
