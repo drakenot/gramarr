@@ -6,43 +6,38 @@ import (
 )
 
 type Movie struct {
-	Added                 time.Time          `json:"added,omitempty"`
-	AlternativeTitles     []AlternativeTitle `json:"alternativeTitles,omitempty"`
-	CleanTitle            string             `json:"cleanTitle,omitempty"`
-	Downloaded            bool               `json:"downloaded,omitempty"`
-	FolderName            string             `json:"folderName,omitempty"`
-	Genres                []string           `json:"genres,omitempty"`
-	HasFile               bool               `json:"hasFile,omitempty"`
-	ID                    int                `json:"id,omitempty"`
-	Images                []Image            `json:"images,omitempty"`
-	ImdbID                string             `json:"imdbId,omitempty"`
-	InCinemas             time.Time          `json:"inCinemas,omitempty"`
-	IsAvailable           bool               `json:"isAvailable,omitempty"`
-	LastInfoSync          time.Time          `json:"lastInfoSync,omitempty"`
-	MinimumAvailability   string             `json:"minimumAvailability,omitempty"`
-	Monitored             bool               `json:"monitored,omitempty"`
-	MovieFile             MovieFile          `json:"movieFile,omitempty"`
-	Overview              string             `json:"overview,omitempty"`
-	Path                  string             `json:"path,omitempty"`
-	PathState             string             `json:"pathState,omitempty"`
-	PhysicalRelease       time.Time          `json:"physicalRelease,omitempty"`
-	ProfileID             int                `json:"profileId,omitempty"`
-	QualityProfileID      int                `json:"qualityProfileId,omitempty"`
-	Ratings               Ratings            `json:"ratings,omitempty"`
-	RemotePoster          string             `json:"remotePoster,omitempty"`
-	Runtime               int                `json:"runtime,omitempty"`
-	SecondaryYearSourceID int                `json:"secondaryYearSourceId,omitempty"`
-	SizeOnDisk            int64              `json:"sizeOnDisk,omitempty"`
-	SortTitle             string             `json:"sortTitle,omitempty"`
-	Status                string             `json:"status,omitempty"`
-	Studio                string             `json:"studio,omitempty"`
-	Tags                  []int              `json:"tags,omitempty"`
-	Title                 string             `json:"title,omitempty,omitempty"`
-	TitleSlug             string             `json:"titleSlug,omitempty"`
-	TmdbID                int                `json:"tmdbId,omitempty"`
-	Website               string             `json:"website,omitempty"`
-	Year                  int                `json:"year,omitempty"`
-	YouTubeTrailerID      string             `json:"youTubeTrailerId,omitempty"`
+	Added               time.Time `json:"added,omitempty"`
+	CleanTitle          string    `json:"cleanTitle,omitempty"`
+	FolderName          string    `json:"folderName,omitempty"`
+	Genres              []string  `json:"genres,omitempty"`
+	HasFile             bool      `json:"hasFile,omitempty"`
+	ID                  int       `json:"id,omitempty"`
+	Images              []Image   `json:"images,omitempty"`
+	ImdbID              string    `json:"imdbId,omitempty"`
+	InCinemas           time.Time `json:"inCinemas,omitempty"`
+	IsAvailable         bool      `json:"isAvailable,omitempty"`
+	MinimumAvailability string    `json:"minimumAvailability,omitempty"`
+	Monitored           bool      `json:"monitored,omitempty"`
+	MovieFile           MovieFile `json:"movieFile,omitempty"`
+	Overview            string    `json:"overview,omitempty"`
+	Path                string    `json:"path,omitempty"`
+	PhysicalRelease     time.Time `json:"physicalRelease,omitempty"`
+	QualityProfileID    int       `json:"qualityProfileId,omitempty"`
+	Ratings             Ratings   `json:"ratings,omitempty"`
+	RootFolderPath      string    `json:"rootFolderPath,omitempty"`
+	RemotePoster        string    `json:"remotePoster,omitempty"`
+	Runtime             int       `json:"runtime,omitempty"`
+	SizeOnDisk          int64     `json:"sizeOnDisk,omitempty"`
+	SortTitle           string    `json:"sortTitle,omitempty"`
+	Status              string    `json:"status,omitempty"`
+	Studio              string    `json:"studio,omitempty"`
+	Tags                []int     `json:"tags,omitempty"`
+	Title               string    `json:"title,omitempty,omitempty"`
+	TitleSlug           string    `json:"titleSlug,omitempty"`
+	TmdbID              int       `json:"tmdbId,omitempty"`
+	Website             string    `json:"website,omitempty"`
+	Year                int       `json:"year,omitempty"`
+	YouTubeTrailerID    string    `json:"youTubeTrailerId,omitempty"`
 }
 
 func (m Movie) String() string {
@@ -168,7 +163,7 @@ type MediaInfo struct {
 	AudioBitrate                 int     `json:"audioBitrate,omitempty"`
 	AudioChannelPositions        string  `json:"audioChannelPositions,omitempty"`
 	AudioChannelPositionsText    string  `json:"audioChannelPositionsText,omitempty"`
-	AudioChannels                int     `json:"audioChannels,omitempty"`
+	AudioChannels                float64 `json:"audioChannels,omitempty"`
 	AudioCodecID                 string  `json:"audioCodecID,omitempty"`
 	AudioCodecLibrary            string  `json:"audioCodecLibrary,omitempty"`
 	AudioFormat                  string  `json:"audioFormat,omitempty"`

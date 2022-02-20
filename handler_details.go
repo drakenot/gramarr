@@ -45,6 +45,7 @@ func (c *DetailsConversation) showDetails(m *tb.Message) Handler {
 		return nil
 	}
 
+	c.movie.RemotePoster = c.env.Radarr.GetPosterURL(c.movie)
 	if c.movie.RemotePoster == "" {
 		traktMovie, _ := c.env.Radarr.SearchMovie(c.movie.TmdbID)
 		c.movie.RemotePoster = c.env.Radarr.GetPosterURL(traktMovie)

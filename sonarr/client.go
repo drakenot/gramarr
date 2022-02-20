@@ -2,11 +2,10 @@ package sonarr
 
 import (
 	"fmt"
+	"github.com/go-resty/resty/v2"
 	"net/url"
 	"regexp"
 	"strings"
-
-	"gopkg.in/resty.v1"
 )
 
 var (
@@ -25,7 +24,7 @@ func NewClient(c Config) (*Client, error) {
 	baseURL := createApiURL(c)
 
 	r := resty.New()
-	r.SetHostURL(baseURL)
+	r.SetBaseURL(baseURL)
 	r.SetHeader("Accept", "application/json")
 	r.SetQueryParam("apikey", c.APIKey)
 	if c.Username != "" && c.Password != "" {

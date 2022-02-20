@@ -240,6 +240,7 @@ func (c *AddMovieConversation) AddMovie(m *tb.Message) {
 		return
 	}
 
+	c.selectedMovie.RemotePoster = c.env.Radarr.GetPosterURL(*c.selectedMovie)
 	if c.selectedMovie.RemotePoster != "" {
 		photo := &tb.Photo{File: tb.FromURL(c.selectedMovie.RemotePoster)}
 		c.env.Bot.Send(m.Sender, photo)

@@ -2,6 +2,7 @@ package radarr
 
 import (
 	"fmt"
+	"github.com/go-resty/resty/v2"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -24,7 +25,7 @@ func NewClient(c Config) (*Client, error) {
 	baseURL := createApiURL(c)
 
 	r := resty.New()
-	r.SetHostURL(baseURL)
+	r.SetBaseURL(baseURL)
 	r.SetHeader("Accept", "application/json")
 	r.SetQueryParam("apikey", c.APIKey)
 	if c.Username != "" && c.Password != "" {
@@ -142,7 +143,7 @@ func (c *Client) SearchMovies(term string) (movies []Movie, err error) {
 }
 
 func (c *Client) GetProfile(isAdmin bool) (profiles []Profile, err error) {
-	resp, err := c.client.R().SetResult([]Profile{}).Get("profile")
+	resp, err := c.client.R().SetResult([]Profile{}).Get("qualityProfile")
 	if err != nil {
 		return
 	}
