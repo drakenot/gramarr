@@ -309,7 +309,7 @@ func (c *AddTVShowConversation) AskFolder(m *tb.Message) Handler {
 }
 
 func (c *AddTVShowConversation) AddTVShow(m *tb.Message) {
-	_, err := c.env.Sonarr.AddTVShow(*c.selectedTVShow, c.selectedLanguageProfile.ID, c.selectedQualityProfile.ID, c.selectedFolder.Path)
+	_, err := c.env.Sonarr.AddTVShow(*c.selectedTVShow, c.selectedLanguageProfile.ID, c.selectedQualityProfile.ID, c.selectedFolder.Path, GetUserName(m))
 
 	// Failed to add TV
 	if err != nil {
@@ -318,8 +318,9 @@ func (c *AddTVShowConversation) AddTVShow(m *tb.Message) {
 		return
 	}
 
-	if c.selectedTVShow.PosterURL != "" {
-		photo := &tb.Photo{File: tb.FromURL(c.selectedTVShow.PosterURL)}
+	c.selectedTVShow.RemotePoster = c.env.Sonarr.GetPosterURL(*c.selectedTVShow)
+	if c.selectedTVShow.RemotePoster != "" {
+		photo := &tb.Photo{File: tb.FromURL(c.selectedTVShow.RemotePoster)}
 		c.env.Bot.Send(m.Sender, photo)
 	}
 

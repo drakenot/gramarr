@@ -94,16 +94,19 @@ func setupHandlers(r *Router, e *Env) {
 
 	// Commands
 	r.HandleFunc("/auth", e.RequirePrivate(e.RequireAuth(UANone, e.HandleAuth)))
-	r.HandleFunc("/start", e.RequirePrivate(e.RequireAuth(UANone, e.HandleStart)))
-	r.HandleFunc("/help", e.RequirePrivate(e.RequireAuth(UANone, e.HandleStart)))
+	r.HandleFunc("/start", e.RequirePrivate(e.RequireAuth(UANone, e.HandleHelp)))
+	r.HandleFunc("/help", e.RequirePrivate(e.RequireAuth(UANone, e.HandleHelp)))
 	r.HandleFunc("/cancel", e.RequirePrivate(e.RequireAuth(UANone, e.HandleCancel)))
 	r.HandleFunc("/addmovie", e.RequirePrivate(e.RequireAuth(UAMember, e.HandleAddMovie)))
 	r.HandleFunc("/listmovies", e.RequirePrivate(e.RequireAuth(UAMember, e.HandleListMovies)))
+	r.HandleFunc("/moviedetails", e.RequirePrivate(e.RequireAuth(UAMember, e.HandleMovieDetails)))
+	r.HandleFunc("/deletemovie", e.RequirePrivate(e.RequireAuth(UAAdmin, e.HandleDeleteMovie)))
 	r.HandleFunc("/addtv", e.RequirePrivate(e.RequireAuth(UAMember, e.HandleAddTVShow)))
+	r.HandleFunc("/listtv", e.RequirePrivate(e.RequireAuth(UAMember, e.HandleListTVShows)))
+	r.HandleFunc("/tvdetails", e.RequirePrivate(e.RequireAuth(UAMember, e.HandleTVShowDetails)))
+	r.HandleFunc("/deletetv", e.RequirePrivate(e.RequireAuth(UAAdmin, e.HandleDeleteTVShow)))
 	r.HandleFunc("/users", e.RequirePrivate(e.RequireAuth(UAAdmin, e.HandleUsers)))
 	r.HandleFunc("/status", e.RequirePrivate(e.RequireAuth(UAAdmin, e.HandleStatus)))
-	r.HandleFunc("/moviedetails", e.RequirePrivate(e.RequireAuth(UAMember, e.HandleDetails)))
-	r.HandleFunc("/deletemovie", e.RequirePrivate(e.RequireAuth(UAAdmin, e.HandleDelete)))
 
 	// Catchall Command
 	r.HandleFallback(e.RequirePrivate(e.RequireAuth(UANone, e.HandleFallback)))

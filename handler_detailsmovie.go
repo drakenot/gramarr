@@ -8,33 +8,33 @@ import (
 	"strings"
 )
 
-func (e *Env) HandleDetails(m *tb.Message) {
-	e.CM.StartConversation(NewDetailsConversation(e), m)
+func (e *Env) HandleMovieDetails(m *tb.Message) {
+	e.CM.StartConversation(NewMovieDetailsConversation(e), m)
 }
 
-func NewDetailsConversation(e *Env) *DetailsConversation {
-	return &DetailsConversation{env: e}
+func NewMovieDetailsConversation(e *Env) *MovieDetailsConversation {
+	return &MovieDetailsConversation{env: e}
 }
 
-type DetailsConversation struct {
+type MovieDetailsConversation struct {
 	currentStep Handler
 	env         *Env
 	movie       radarr.Movie
 }
 
-func (c *DetailsConversation) Run(m *tb.Message) {
-	c.currentStep = c.showDetails(m)
+func (c *MovieDetailsConversation) Run(m *tb.Message) {
+	c.currentStep = c.showMovieDetails(m)
 }
 
-func (c *DetailsConversation) Name() string {
-	return "details"
+func (c *MovieDetailsConversation) Name() string {
+	return "moviedetails"
 }
 
-func (c *DetailsConversation) CurrentStep() Handler {
+func (c *MovieDetailsConversation) CurrentStep() Handler {
 	return c.currentStep
 }
 
-func (c *DetailsConversation) showDetails(m *tb.Message) Handler {
+func (c *MovieDetailsConversation) showMovieDetails(m *tb.Message) Handler {
 	movieId, err := strconv.Atoi(m.Payload)
 	if err != nil {
 		return nil
@@ -129,7 +129,7 @@ func (c *DetailsConversation) showDetails(m *tb.Message) Handler {
 	}
 }
 
-func (c *DetailsConversation) askRemoveRequester(m *tb.Message) Handler {
+func (c *MovieDetailsConversation) askRemoveRequester(m *tb.Message) Handler {
 	var options []string
 	for _, t := range c.movie.Tags {
 		tag, err := c.env.Radarr.GetTagById(t)
@@ -137,20 +137,20 @@ func (c *DetailsConversation) askRemoveRequester(m *tb.Message) Handler {
 			options = append(options, tag.Label)
 		}
 	}
-	options = append(options, "Back to details")
+	options = append(options, "Back to movie details")
 	options = append(options, "/cancel")
 	SendKeyboardList(c.env.Bot, m.Sender, "Remove user from requester list", options)
 
 	return func(m *tb.Message) {
-		if m.Text != "Back to details" {
+		if m.Text != "Back to movie details" {
 			c.removeRequester(m, m.Text)
 		}
 		m.Payload = strconv.Itoa(c.movie.ID)
-		c.currentStep = c.showDetails(m)
+		c.currentStep = c.showMovieDetails(m)
 	}
 }
 
-func (c *DetailsConversation) askAddRequester(m *tb.Message) Handler {
+func (c *MovieDetailsConversation) askAddRequester(m *tb.Message) Handler {
 	tags, err := c.env.Radarr.GetTags()
 	var options []string
 	if err == nil {
@@ -160,20 +160,20 @@ func (c *DetailsConversation) askAddRequester(m *tb.Message) Handler {
 	} else {
 		SendError(c.env.Bot, m.Sender, "Could not retrieve tag list")
 	}
-	options = append(options, "Back to details")
+	options = append(options, "Back to movie details")
 	options = append(options, "/cancel")
 	SendKeyboardList(c.env.Bot, m.Sender, "Add user from requester list", options)
 
 	return func(m *tb.Message) {
-		if m.Text != "Back to details" {
+		if m.Text != "Back to movie details" {
 			c.addRequester(m, m.Text)
 		}
 		m.Payload = strconv.Itoa(c.movie.ID)
-		c.currentStep = c.showDetails(m)
+		c.currentStep = c.showMovieDetails(m)
 	}
 }
 
-func (c *DetailsConversation) removeRequester(m *tb.Message, requester string) {
+func (c *MovieDetailsConversation) removeRequester(m *tb.Message, requester string) {
 	var err error
 	c.movie, err = c.env.Radarr.RemoveRequester(c.movie, requester)
 	if err == nil {
@@ -188,7 +188,7 @@ func (c *DetailsConversation) removeRequester(m *tb.Message, requester string) {
 	}
 }
 
-func (c *DetailsConversation) addRequester(m *tb.Message, requester string) {
+func (c *MovieDetailsConversation) addRequester(m *tb.Message, requester string) {
 	var err error
 	c.movie, err = c.env.Radarr.AddRequester(c.movie, requester)
 	if err == nil {

@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func (e *Env) HandleDelete(m *tb.Message) {
+func (e *Env) HandleDeleteMovie(m *tb.Message) {
 	movieId, err := strconv.Atoi(m.Payload)
 	if err != nil {
 		Send(e.Bot, m.Sender, "Please enter a valid movie ID")

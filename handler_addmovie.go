@@ -116,7 +116,7 @@ func (c *AddMovieConversation) AskPickMovie(m *tb.Message) Handler {
 			Send(c.env.Bot, m.Sender, "This movie has already been requested. You will be added to the requester list")
 			_, _ = c.env.Radarr.AddRequester(existingMovie, GetUserName(m))
 			m.Payload = strconv.Itoa(c.selectedMovie.ID)
-			c.env.HandleDetails(m)
+			c.env.HandleMovieDetails(m)
 
 			c.env.CM.StopConversation(c)
 			return

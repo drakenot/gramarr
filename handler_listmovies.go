@@ -141,7 +141,7 @@ func (c *ListMoviesConversation) AskMovie(m *tb.Message) Handler {
 		}
 
 		m.Payload = strconv.Itoa(c.selectedMovie.ID)
-		c.env.HandleDetails(m)
+		c.env.HandleMovieDetails(m)
 		c.env.CM.StopConversation(c)
 	}
 
