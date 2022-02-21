@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/gramarr/sonarr"
@@ -110,28 +111,36 @@ func (c *AddTVShowConversation) AskPickTVShow(m *tb.Message) Handler {
 	}
 }
 
+func (c *AddTVShowConversation) isSelectedSeason(s *sonarr.TVShowSeason) bool {
+
+	for _, season := range c.selectedTVShowSeasons {
+		if s.SeasonNumber == season.SeasonNumber {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) Handler {
+
+	if c.selectedTVShowSeasons == nil {
+		c.selectedTVShowSeasons = []sonarr.TVShowSeason{}
+	}
 
 	// Send custom reply keyboard
 	var options []string
+	options = append(options, "All")
 	if len(c.selectedTVShowSeasons) > 0 {
 		options = append(options, "Nope. I'm done!")
 	}
-	for _, Season := range c.selectedTVShow.Seasons {
-		if len(c.selectedTVShowSeasons) > 0 {
-			show := true
-			for _, TVShowSeason := range c.selectedTVShowSeasons {
-				if TVShowSeason.SeasonNumber == Season.SeasonNumber {
-					show = false
-				}
-			}
-			if show {
-				options = append(options, fmt.Sprintf("%v", Season.SeasonNumber))
-			}
-		} else {
-			options = append(options, fmt.Sprintf("%v", Season.SeasonNumber))
+
+	for _, season := range c.selectedTVShow.Seasons {
+		if !c.isSelectedSeason(season) && season.SeasonNumber > 0 {
+			options = append(options, fmt.Sprintf("%v", season.SeasonNumber))
 		}
 	}
+
 	options = append(options, "/cancel")
 	if len(c.selectedTVShowSeasons) > 0 {
 		SendKeyboardList(c.env.Bot, m.Sender, "Any other season?", options)
@@ -140,36 +149,42 @@ func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) Handler {
 	}
 
 	return func(m *tb.Message) {
-
-		if m.Text == "Nope. I'm done!" {
-			for _, selectedTVShowSeason := range c.selectedTVShow.Seasons {
-				selectedTVShowSeason.Monitored = false
-				for _, chosenSeason := range c.selectedTVShowSeasons {
-					if chosenSeason.SeasonNumber == selectedTVShowSeason.SeasonNumber {
-						selectedTVShowSeason.Monitored = true
-					}
+		if m.Text == "All" {
+			c.selectedTVShowSeasons = []sonarr.TVShowSeason{}
+			for _, season := range c.selectedTVShow.Seasons {
+				if season.SeasonNumber > 0 {
+					c.selectedTVShowSeasons = append(c.selectedTVShowSeasons, *season)
 				}
 			}
 			c.currentStep = c.AskPickTVShowQuality(m)
 			return
-		}
-
-		// Set the selected TV
-		for i := range options {
-			if m.Text == options[i] {
-				c.selectedTVShowSeasons = append(c.selectedTVShowSeasons, *c.selectedTVShow.Seasons[i])
-				break
-			}
-		}
-
-		// Not a valid TV selection
-		if c.selectedTVShowSeasons == nil {
-			SendError(c.env.Bot, m.Sender, "Invalid selection.")
-			c.currentStep = c.AskPickTVShowSeason(m)
+		} else if m.Text == "Nope. I'm done!" {
+			c.currentStep = c.AskPickTVShowQuality(m)
 			return
-		}
+		} else {
+			var selectedSeason *sonarr.TVShowSeason
 
-		c.currentStep = c.AskPickTVShowSeason(m)
+			// Set the selected TV
+			i, err := strconv.Atoi(m.Text)
+			if err == nil && i <= len(c.selectedTVShow.Seasons) && i > 0 {
+				for _, season := range c.selectedTVShow.Seasons {
+					if i == season.SeasonNumber {
+						selectedSeason = season
+						break
+					}
+				}
+			}
+
+			// Not a valid TV selection
+			if selectedSeason == nil {
+				SendError(c.env.Bot, m.Sender, "Invalid selection.")
+				c.currentStep = c.AskPickTVShowSeason(m)
+				return
+			}
+
+			c.selectedTVShowSeasons = append(c.selectedTVShowSeasons, *selectedSeason)
+			c.currentStep = c.AskPickTVShowSeason(m)
+		}
 	}
 }
 
