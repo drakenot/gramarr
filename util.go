@@ -56,3 +56,13 @@ func EscapeMarkdown(s string) string {
 	s = strings.Replace(s, "_", "\\_", -1)
 	return s
 }
+
+func GetUserName(m *tb.Message) string {
+	var username string
+	if len(m.Sender.Username) > 0 {
+		username = m.Sender.Username
+	} else {
+		username = fmt.Sprintf("%s %s", m.Sender.FirstName, m.Sender.LastName)
+	}
+	return strings.TrimSpace(strings.ToLower(username))
+}

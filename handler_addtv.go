@@ -26,7 +26,8 @@ type AddTVShowConversation struct {
 	TVShowResults           []sonarr.TVShow
 	folderResults           []sonarr.Folder
 	selectedTVShow          *sonarr.TVShow
-	selectedTVShowSeasons   []*sonarr.TVShowSeason
+	selectedTVShowSeasons   []sonarr.TVShowSeason
+	selectedQualityProfile  *sonarr.Profile
 	selectedLanguageProfile *sonarr.Profile
 	selectedFolder          *sonarr.Folder
 	env                     *Env
@@ -53,11 +54,8 @@ func (c *AddTVShowConversation) AskTVShow(m *tb.Message) Handler {
 		TVShows, err := c.env.Sonarr.SearchTVShows(c.TVQuery)
 		c.TVShowResults = TVShows
 
-		// TODO merge lookup with existing series and set the monitored status correctly
-
 		// Search Service Failed
 		if err != nil {
-			fmt.Println(err)
 			SendError(c.env.Bot, m.Sender, "Failed to search TV Show.")
 			c.env.CM.StopConversation(c)
 			return
@@ -124,14 +122,54 @@ func (c *AddTVShowConversation) isSelectedSeason(s *sonarr.TVShowSeason) bool {
 	return false
 }
 
-func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) Handler {
+func (c *AddTVShowConversation) AskPickTVShowQuality(m *tb.Message) Handler {
 
-	if c.selectedTVShowSeasons == nil {
-		c.selectedTVShowSeasons = []*sonarr.TVShowSeason{}
+	profiles, err := c.env.Sonarr.GetProfile("qualityprofile")
+
+	// GetProfile Service Failed
+	if err != nil {
+		SendError(c.env.Bot, m.Sender, "Failed to get quality profiles.")
+		c.env.CM.StopConversation(c)
+		return nil
 	}
 
 	// Send custom reply keyboard
 	var options []string
+	for _, QualityProfile := range profiles {
+		options = append(options, fmt.Sprintf("%v", QualityProfile.Name))
+	}
+	options = append(options, "/cancel")
+	SendKeyboardList(c.env.Bot, m.Sender, "Which quality shall I look for?", options)
+
+	return func(m *tb.Message) {
+		// Set the selected option
+		for i := range options {
+			if m.Text == options[i] {
+				c.selectedQualityProfile = &profiles[i]
+				break
+			}
+		}
+
+		// Not a valid selection
+		if c.selectedQualityProfile == nil {
+			SendError(c.env.Bot, m.Sender, "Invalid selection.")
+			c.currentStep = c.AskPickTVShowQuality(m)
+			return
+		}
+
+		c.currentStep = c.AskFolder(m)
+	}
+}
+
+func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) Handler {
+
+	if c.selectedTVShowSeasons == nil {
+		c.selectedTVShowSeasons = []sonarr.TVShowSeason{}
+	}
+
+	// Send custom reply keyboard
+	var options []string
+	options = append(options, "All")
 	if len(c.selectedTVShowSeasons) > 0 {
 		options = append(options, "Nope. I'm done!")
 	}
@@ -150,26 +188,17 @@ func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) Handler {
 	}
 
 	return func(m *tb.Message) {
-
-		if m.Text == "Nope. I'm done!" {
-
-			// merge selected seasons
-			// for i := 0; i < len(c.selectedTVShow.Seasons); i++ {
-			// 	for j := 0; j < len(c.selectedTVShowSeasons); j++ {
-			// 		if c.selectedTVShowSeasons[j].SeasonNumber != c.selectedTVShow.Seasons[i].SeasonNumber {
-			// 			continue
-			// 		}
-
-			// 		if c.selectedTVShowSeasons[j].Monitored {
-			// 			c.selectedTVShow.Seasons[i].Monitored = true
-			// 		}
-			// 	}
-			// }
-
-			// c.selectedTVShow.Seasons = c.selectedTVShowSeasons
-
+		if m.Text == "All" {
+			c.selectedTVShowSeasons = []sonarr.TVShowSeason{}
+			for _, season := range c.selectedTVShow.Seasons {
+				if season.SeasonNumber > 0 {
+					c.selectedTVShowSeasons = append(c.selectedTVShowSeasons, *season)
+				}
+			}
 			c.currentStep = c.AskFolder(m)
-
+			return
+		} else if m.Text == "Nope. I'm done!" {
+			c.currentStep = c.AskFolder(m)
 			return
 		} else {
 			var selectedSeason *sonarr.TVShowSeason
@@ -192,7 +221,7 @@ func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) Handler {
 				return
 			}
 
-			c.selectedTVShowSeasons = append(c.selectedTVShowSeasons, selectedSeason)
+			c.selectedTVShowSeasons = append(c.selectedTVShowSeasons, *selectedSeason)
 			c.currentStep = c.AskPickTVShowSeason(m)
 		}
 	}
@@ -256,7 +285,7 @@ func (c *AddTVShowConversation) AskFolder(m *tb.Message) Handler {
 }
 
 func (c *AddTVShowConversation) AddTVShow(m *tb.Message) {
-	_, err := c.env.Sonarr.AddTVShow(*c.selectedTVShow, c.selectedTVShowSeasons, c.env.Config.Sonarr.QualityID, c.selectedFolder.Path)
+	_, err := c.env.Sonarr.AddTVShow(*c.selectedTVShow, c.env.Config.Sonarr.QualityID, c.selectedFolder.Path, GetUserName(m))
 
 	// Failed to add TV
 	if err != nil {
@@ -265,8 +294,9 @@ func (c *AddTVShowConversation) AddTVShow(m *tb.Message) {
 		return
 	}
 
-	if c.selectedTVShow.PosterURL != "" {
-		photo := &tb.Photo{File: tb.FromURL(c.selectedTVShow.PosterURL)}
+	c.selectedTVShow.RemotePoster = c.env.Sonarr.GetPosterURL(*c.selectedTVShow)
+	if c.selectedTVShow.RemotePoster != "" {
+		photo := &tb.Photo{File: tb.FromURL(c.selectedTVShow.RemotePoster)}
 		c.env.Bot.Send(m.Sender, photo)
 	}
 
