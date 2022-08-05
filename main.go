@@ -38,7 +38,7 @@ func main() {
 
 	err = ValidateConfig(conf)
 	if err != nil {
-		log.Fatal("config error: %v", err)
+		log.Fatalf("config error: %v", err)
 	}
 
 	userPath := filepath.Join(*configDir, "users.json")

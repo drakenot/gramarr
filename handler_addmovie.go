@@ -20,13 +20,13 @@ func NewAddMovieConversation(e *Env) *AddMovieConversation {
 }
 
 type AddMovieConversation struct {
-	currentStep            Handler
-	movieQuery             string
-	movieResults           []radarr.Movie
-	folderResults          []radarr.Folder
-	selectedMovie          *radarr.Movie
-	selectedFolder         *radarr.Folder
-	env                    *Env
+	currentStep    Handler
+	movieQuery     string
+	movieResults   []radarr.Movie
+	folderResults  []radarr.Folder
+	selectedMovie  *radarr.Movie
+	selectedFolder *radarr.Folder
+	env            *Env
 }
 
 func (c *AddMovieConversation) Run(m *tb.Message) {
@@ -109,7 +109,9 @@ func (c *AddMovieConversation) AskPickMovie(m *tb.Message) Handler {
 
 func (c *AddMovieConversation) AskFolder(m *tb.Message) Handler {
 
-	folders, err := c.env.Radarr.GetFolders()
+	user, _ := c.env.Users.User(m.Sender.ID)
+
+	folders, err := c.env.Radarr.GetFolders(user.IsAdmin())
 	c.folderResults = folders
 
 	// GetFolders Service Failed
@@ -165,7 +167,7 @@ func (c *AddMovieConversation) AskFolder(m *tb.Message) Handler {
 }
 
 func (c *AddMovieConversation) AddMovie(m *tb.Message) {
-	_, err := c.env.Radarr.AddMovie(*c.selectedMovie, c.env.Config.Radarr.QualityID, c.selectedFolder.Path)
+	_, err := c.env.Radarr.AddMovie(*c.selectedMovie, c.env.Config.Radarr.QualityID, c.selectedFolder.Path, GetUserName(m))
 
 	// Failed to add movie
 	if err != nil {
@@ -174,8 +176,8 @@ func (c *AddMovieConversation) AddMovie(m *tb.Message) {
 		return
 	}
 
-	if c.selectedMovie.PosterURL != "" {
-		photo := &tb.Photo{File: tb.FromURL(c.selectedMovie.PosterURL)}
+	if c.selectedMovie.RemotePoster != "" {
+		photo := &tb.Photo{File: tb.FromURL(c.selectedMovie.RemotePoster)}
 		c.env.Bot.Send(m.Sender, photo)
 	}
 

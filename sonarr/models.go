@@ -1,57 +1,48 @@
 package sonarr
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type TVShow struct {
-	Title             string                 `json:"title"`
-	TitleSlug         string                 `json:"titleSlug"`
-	Year              int                    `json:"year"`
-	PosterURL         string                 `json:"remotePoster"`
-	TVDBID            int                    `json:"tvdbId"`
-	Images            []TVShowImage          `json:"images"`
-	Seasons           []*TVShowSeason        `json:"seasons"`
-	AlternateTitles   []TVShowAlternateTitle `json:"alternateTitles"`
-	SortTitle         string                 `json:"sortTitle"`
-	SeasonCount       int                    `json:"seasonCount"`
-	TotalEpisodeCount int                    `json:"TotalEpisodeCount"`
-	EpisodeCount      int                    `json:"episodeCount"`
-	EpisodeFileCount  int                    `json:"episodeFileCount"`
-	SizeOnDisk        uint64                 `json:"sizeOnDisk"`
-	Status            string                 `json:"status"`
-	Overview          string                 `json:"overview"`
-	PreviousAiring    string                 `json:"previousAiring"`
-	Network           string                 `json:"network"`
-	AirTime           string                 `json:"airTime"`
-	Path              string                 `json:"path"`
-	ProfileID         int                    `json:"profileId"`
-	SeasonFolder      bool                   `json:"seasonFolder"`
-	Monitored         bool                   `json:"monitored"`
-	UseSceneNumbering bool                   `json:"useSceneNumbering"`
-	Runtime           int                    `json:"runtime"`
-	TVRageID          int                    `json:"tvRageId"`
-	TVMazeID          int                    `json:"tvMazeId"`
-	FirstAired        string                 `json:"firstAired"`
-	LastInfoSync      string                 `json:"lastInfoSync"`
-	SeriesType        string                 `json:"seriesType"`
-	CleanTitle        string                 `json:"cleanTitle"`
-	IMDBID            string                 `json:"imdbId"`
-	Certification     string                 `json:"certification"`
-	Genres            []string               `json:"genres"`
-	Tags              []string               `json:"tags"`
-	Added             string                 `json:"added"`
-	Ratings           TVShowRating           `json:"ratings"`
-	QualityProfileID  int                    `json:"qualityProfileId"`
-	ID                int                    `json:"id"`
-}
-
-type TVShowAlternateTitle struct {
-	Title        string `json:"title"`
-	SeasonNumber int    `json:"seasonNumber"`
-}
-
-type TVShowRating struct {
-	Votes int     `json:"votes"`
-	Value float32 `json:"value"`
+	Added             time.Time         `json:"added"`
+	AirTime           string            `json:"airTime,omitempty"`
+	AlternateTitles   []AlternateTitles `json:"alternateTitles"`
+	Certification     string            `json:"certification,omitempty"`
+	CleanTitle        string            `json:"cleanTitle"`
+	Ended             bool              `json:"ended"`
+	FirstAired        time.Time         `json:"firstAired,omitempty"`
+	Genres            []string          `json:"genres"`
+	ID                int               `json:"id,omitempty"`
+	Images            []TVShowImage     `json:"images"`
+	ImdbID            string            `json:"imdbId,omitempty"`
+	LanguageProfileID int               `json:"languageProfileId"`
+	Monitored         bool              `json:"monitored,omitempty"`
+	Network           string            `json:"network"`
+	NextAiring        time.Time         `json:"nextAiring,omitempty"`
+	Overview          string            `json:"overview,omitempty"`
+	Path              string            `json:"path,omitempty"`
+	PreviousAiring    time.Time         `json:"previousAiring,omitempty"`
+	QualityProfileID  int               `json:"qualityProfileId"`
+	Ratings           TVShowRatings     `json:"ratings,omitempty"`
+	RootFolderPath    string            `json:"rootFolderPath"`
+	Runtime           int               `json:"runtime"`
+	RemotePoster      string            `json:"remotePoster"`
+	Seasons           []*TVShowSeason   `json:"seasons"`
+	SeasonFolder      bool              `json:"seasonFolder"`
+	SeriesType        string            `json:"seriesType"`
+	SortTitle         string            `json:"sortTitle"`
+	Statistics        TVShowStatistics  `json:"statistics,omitempty"`
+	Status            string            `json:"status"`
+	Tags              []int             `json:"tags,omitempty"`
+	Title             string            `json:"title"`
+	TitleSlug         string            `json:"titleSlug"`
+	TvMazeID          int               `json:"tvMazeId"`
+	TvRageID          int               `json:"tvRageId"`
+	TvdbID            int               `json:"tvdbId"`
+	UseSceneNumbering bool              `json:"useSceneNumbering"`
+	Year              int               `json:"year"`
 }
 
 func (m TVShow) String() string {
@@ -65,11 +56,47 @@ func (m TVShow) String() string {
 type TVShowImage struct {
 	CoverType string `json:"coverType"`
 	URL       string `json:"url"`
+	RemoteURL string `json:"remoteUrl,omitempty"`
+}
+
+type AlternateTitles struct {
+	Title        string `json:"title,omitempty"`
+	SeasonNumber int    `json:"seasonNumber,omitempty"`
 }
 
 type TVShowSeason struct {
-	SeasonNumber int  `json:"seasonNumber"`
-	Monitored    bool `json:"monitored"`
+	SeasonNumber int              `json:"seasonNumber"`
+	Monitored    bool             `json:"monitored"`
+	Statistics   SeasonStatistics `json:"statistics,omitempty"`
+}
+
+type TVShowRatings struct {
+	Value float64 `json:"value,omitempty"`
+	Votes int     `json:"votes,omitempty"`
+}
+
+type TVShowStatistics struct {
+	SeasonCount       int     `json:"seasonCount,omitempty"`
+	EpisodeFileCount  int     `json:"episodeFileCount,omitempty"`
+	EpisodeCount      int     `json:"episodeCount,omitempty"`
+	TotalEpisodeCount int     `json:"totalEpisodeCount,omitempty"`
+	SizeOnDisk        int64   `json:"sizeOnDisk,omitempty"`
+	PercentOfEpisodes float64 `json:"percentOfEpisodes,omitempty"`
+}
+
+type SeasonStatistics struct {
+	EpisodeCount      int       `json:"episodeCount"`
+	EpisodeFileCount  int       `json:"episodeFileCount"`
+	PercentOfEpisodes float64   `json:"percentOfEpisodes"`
+	NextAiring        time.Time `json:"nextAiring"`
+	PreviousAiring    time.Time `json:"previousAiring"`
+	SizeOnDisk        int64     `json:"sizeOnDisk"`
+	TotalEpisodeCount int       `json:"totalEpisodeCount"`
+}
+
+type TVShowTag struct {
+	Id    int    `json:"id,omitempty"`
+	Label string `json:"label,omitempty"`
 }
 
 type Folder struct {
@@ -92,14 +119,39 @@ type AddTVShowRequest struct {
 	TVDBID            int              `json:"tvdbId"`
 	RootFolderPath    string           `json:"rootFolderPath"`
 	Monitored         bool             `json:"monitored"`
+	SeasonFolder      bool             `json:"seasonFolder"`
+	Tags              []int            `json:"tags,omitempty"`
 	AddOptions        AddTVShowOptions `json:"addOptions"`
 	Year              int              `json:"year"`
 	Seasons           []*TVShowSeason  `json:"seasons"`
-	SeasonFolder      bool             `json:"seasonFolder"`
 }
 
 type AddTVShowOptions struct {
 	SearchForMissingEpisodes   bool `json:"searchForMissingEpisodes"`
 	IgnoreEpisodesWithFiles    bool `json:"ignoreEpisodesWithFiles"`
 	IgnoreEpisodesWithoutFiles bool `json:"ignoreEpisodesWithoutFiles"`
+}
+
+type SystemStatus struct {
+	Version           string `json:"version"`
+	BuildTime         string `json:"buildTime"`
+	IsDebug           bool   `json:"isDebug"`
+	IsProduction      bool   `json:"isProduction"`
+	IsAdmin           bool   `json:"isAdmin"`
+	IsUserInteractive bool   `json:"isUserInteractive"`
+	StartupPath       string `json:"startupPath"`
+	AppData           string `json:"appData"`
+	OsName            string `json:"osName"`
+	OsVersion         string `json:"osVersion"`
+	IsMonoRuntime     bool   `json:"isMonoRuntime"`
+	IsMono            bool   `json:"isMono"`
+	IsLinux           bool   `json:"isLinux"`
+	IsOsx             bool   `json:"isOsx"`
+	IsWindows         bool   `json:"isWindows"`
+	Branch            string `json:"branch"`
+	Authentication    string `json:"authentication"`
+	SqliteVersion     string `json:"sqliteVersion"`
+	UrlBase           string `json:"urlBase"`
+	RuntimeVersion    string `json:"runtimeVersion"`
+	RuntimeName       string `json:"runtimeName"`
 }
