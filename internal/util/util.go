@@ -1,9 +1,10 @@
-package main
+package util
 
 import (
 	"fmt"
 	"strings"
 
+	Users "github.com/drakenot/gramarr/internal/repos/users"
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
@@ -15,7 +16,7 @@ func SendError(bot *tb.Bot, to tb.Recipient, msg string) {
 	bot.Send(to, msg, tb.ModeMarkdown)
 }
 
-func SendAdmin(bot *tb.Bot, to []User, msg string) {
+func SendAdmin(bot *tb.Bot, to []Users.User, msg string) {
 	SendMany(bot, to, fmt.Sprintf("*[Admin]* %s", msg))
 }
 
@@ -36,7 +37,7 @@ func SendKeyboardList(bot *tb.Bot, to tb.Recipient, msg string, list []string) {
 	})
 }
 
-func SendMany(bot *tb.Bot, to []User, msg string) {
+func SendMany(bot *tb.Bot, to []Users.User, msg string) {
 	for _, user := range to {
 		bot.Send(user, msg, tb.ModeMarkdown)
 	}

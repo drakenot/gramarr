@@ -1,13 +1,12 @@
-package main
+package chatbot
 
 import (
 	"fmt"
-
-	tb "gopkg.in/tucnak/telebot.v2"
-	"github.com/patrickmn/go-cache"
 	"time"
-)
 
+	"github.com/patrickmn/go-cache"
+	tb "gopkg.in/tucnak/telebot.v2"
+)
 
 type Conversation interface {
 	Run(m *tb.Message)
@@ -16,7 +15,7 @@ type Conversation interface {
 }
 
 type ConversationManager struct {
-	convos        *cache.Cache
+	convos *cache.Cache
 }
 
 func NewConversationManager() *ConversationManager {

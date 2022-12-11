@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"encoding/json"
@@ -6,8 +6,8 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/drakenot/gramarr/radarr"
-	"github.com/drakenot/gramarr/sonarr"
+	"github.com/drakenot/gramarr/pkg/radarr"
+	"github.com/drakenot/gramarr/pkg/sonarr"
 )
 
 type Config struct {

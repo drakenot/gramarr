@@ -1,18 +1,19 @@
-package main
+package mediabot
 
 import (
 	"fmt"
 	"strings"
 
+	"github.com/drakenot/gramarr/internal/util"
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-func (e *Env) HandleStart(m *tb.Message) {
+func (b *MediaBot) HandleStart(m *tb.Message) {
 
-	user, exists := e.Users.User(m.Sender.ID)
+	user, exists := b.Users.User(m.Sender.ID)
 
 	var msg []string
-	msg = append(msg, fmt.Sprintf("Hello, I'm %s! Use these commands to control me:", e.Bot.Me.FirstName))
+	msg = append(msg, fmt.Sprintf("Hello, I'm %s! Use these commands to control me:", b.TClient.Me.FirstName))
 
 	if !exists {
 		msg = append(msg, "")
@@ -34,5 +35,5 @@ func (e *Env) HandleStart(m *tb.Message) {
 		msg = append(msg, "/cancel - cancel the current operation")
 	}
 
-	Send(e.Bot, m.Sender, strings.Join(msg, "\n"))
+	util.Send(b.TClient, m.Sender, strings.Join(msg, "\n"))
 }

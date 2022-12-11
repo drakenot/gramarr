@@ -1,27 +1,28 @@
-package main
+package mediabot
 
 import (
 	"fmt"
+	"path/filepath"
 	"strconv"
 	"strings"
 
-	"github.com/drakenot/gramarr/sonarr"
-
-	"path/filepath"
+	"github.com/drakenot/gramarr/internal/util"
+	"github.com/drakenot/gramarr/pkg/chatbot"
+	"github.com/drakenot/gramarr/pkg/sonarr"
 
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-func (e *Env) HandleAddTVShow(m *tb.Message) {
-	e.CM.StartConversation(NewAddTVShowConversation(e), m)
+func (b *MediaBot) HandleAddTVShow(m *tb.Message) {
+	b.CM.StartConversation(NewAddTVShowConversation(b), m)
 }
 
-func NewAddTVShowConversation(e *Env) *AddTVShowConversation {
-	return &AddTVShowConversation{env: e}
+func NewAddTVShowConversation(b *MediaBot) *AddTVShowConversation {
+	return &AddTVShowConversation{bot: b}
 }
 
 type AddTVShowConversation struct {
-	currentStep             Handler
+	currentStep             chatbot.Handler
 	TVQuery                 string
 	TVShowResults           []sonarr.TVShow
 	folderResults           []sonarr.Folder
@@ -30,7 +31,7 @@ type AddTVShowConversation struct {
 	selectedQualityProfile  *sonarr.Profile
 	selectedLanguageProfile *sonarr.Profile
 	selectedFolder          *sonarr.Folder
-	env                     *Env
+	bot                     *MediaBot
 }
 
 func (c *AddTVShowConversation) Run(m *tb.Message) {
@@ -41,31 +42,31 @@ func (c *AddTVShowConversation) Name() string {
 	return "addtv"
 }
 
-func (c *AddTVShowConversation) CurrentStep() Handler {
+func (c *AddTVShowConversation) CurrentStep() chatbot.Handler {
 	return c.currentStep
 }
 
-func (c *AddTVShowConversation) AskTVShow(m *tb.Message) Handler {
-	Send(c.env.Bot, m.Sender, "What TV Show do you want to search for?")
+func (c *AddTVShowConversation) AskTVShow(m *tb.Message) chatbot.Handler {
+	util.Send(c.bot.TClient, m.Sender, "What TV Show do you want to search for?")
 
 	return func(m *tb.Message) {
 		c.TVQuery = m.Text
 
-		TVShows, err := c.env.Sonarr.SearchTVShows(c.TVQuery)
+		TVShows, err := c.bot.Sonarr.SearchTVShows(c.TVQuery)
 		c.TVShowResults = TVShows
 
 		// Search Service Failed
 		if err != nil {
-			SendError(c.env.Bot, m.Sender, "Failed to search TV Show.")
-			c.env.CM.StopConversation(c)
+			util.SendError(c.bot.TClient, m.Sender, "Failed to search TV Show.")
+			c.bot.CM.StopConversation(c)
 			return
 		}
 
 		// No Results
 		if len(TVShows) == 0 {
-			msg := fmt.Sprintf("No TV Show found with the title '%s'", EscapeMarkdown(c.TVQuery))
-			Send(c.env.Bot, m.Sender, msg)
-			c.env.CM.StopConversation(c)
+			msg := fmt.Sprintf("No TV Show found with the title '%s'", util.EscapeMarkdown(c.TVQuery))
+			util.Send(c.bot.TClient, m.Sender, msg)
+			c.bot.CM.StopConversation(c)
 			return
 		}
 
@@ -73,14 +74,14 @@ func (c *AddTVShowConversation) AskTVShow(m *tb.Message) Handler {
 		var msg []string
 		msg = append(msg, fmt.Sprintf("*Found %d TV Shows:*", len(TVShows)))
 		for i, TV := range TVShows {
-			msg = append(msg, fmt.Sprintf("%d) %s", i+1, EscapeMarkdown(TV.String())))
+			msg = append(msg, fmt.Sprintf("%d) %s", i+1, util.EscapeMarkdown(TV.String())))
 		}
-		Send(c.env.Bot, m.Sender, strings.Join(msg, "\n"))
+		util.Send(c.bot.TClient, m.Sender, strings.Join(msg, "\n"))
 		c.currentStep = c.AskPickTVShow(m)
 	}
 }
 
-func (c *AddTVShowConversation) AskPickTVShow(m *tb.Message) Handler {
+func (c *AddTVShowConversation) AskPickTVShow(m *tb.Message) chatbot.Handler {
 
 	// Send custom reply keyboard
 	var options []string
@@ -88,7 +89,7 @@ func (c *AddTVShowConversation) AskPickTVShow(m *tb.Message) Handler {
 		options = append(options, fmt.Sprintf("%s", TVShow))
 	}
 	options = append(options, "/cancel")
-	SendKeyboardList(c.env.Bot, m.Sender, "Which one would you like to download?", options)
+	util.SendKeyboardList(c.bot.TClient, m.Sender, "Which one would you like to download?", options)
 
 	return func(m *tb.Message) {
 
@@ -102,7 +103,7 @@ func (c *AddTVShowConversation) AskPickTVShow(m *tb.Message) Handler {
 
 		// Not a valid TV selection
 		if c.selectedTVShow == nil {
-			SendError(c.env.Bot, m.Sender, "Invalid selection.")
+			util.SendError(c.bot.TClient, m.Sender, "Invalid selection.")
 			c.currentStep = c.AskPickTVShow(m)
 			return
 		}
@@ -122,14 +123,14 @@ func (c *AddTVShowConversation) isSelectedSeason(s *sonarr.TVShowSeason) bool {
 	return false
 }
 
-func (c *AddTVShowConversation) AskPickTVShowQuality(m *tb.Message) Handler {
+func (c *AddTVShowConversation) AskPickTVShowQuality(m *tb.Message) chatbot.Handler {
 
-	profiles, err := c.env.Sonarr.GetProfile("qualityprofile")
+	profiles, err := c.bot.Sonarr.GetProfile("qualityprofile")
 
 	// GetProfile Service Failed
 	if err != nil {
-		SendError(c.env.Bot, m.Sender, "Failed to get quality profiles.")
-		c.env.CM.StopConversation(c)
+		util.SendError(c.bot.TClient, m.Sender, "Failed to get quality profiles.")
+		c.bot.CM.StopConversation(c)
 		return nil
 	}
 
@@ -139,7 +140,7 @@ func (c *AddTVShowConversation) AskPickTVShowQuality(m *tb.Message) Handler {
 		options = append(options, fmt.Sprintf("%v", QualityProfile.Name))
 	}
 	options = append(options, "/cancel")
-	SendKeyboardList(c.env.Bot, m.Sender, "Which quality shall I look for?", options)
+	util.SendKeyboardList(c.bot.TClient, m.Sender, "Which quality shall I look for?", options)
 
 	return func(m *tb.Message) {
 		// Set the selected option
@@ -152,7 +153,7 @@ func (c *AddTVShowConversation) AskPickTVShowQuality(m *tb.Message) Handler {
 
 		// Not a valid selection
 		if c.selectedQualityProfile == nil {
-			SendError(c.env.Bot, m.Sender, "Invalid selection.")
+			util.SendError(c.bot.TClient, m.Sender, "Invalid selection.")
 			c.currentStep = c.AskPickTVShowQuality(m)
 			return
 		}
@@ -161,7 +162,7 @@ func (c *AddTVShowConversation) AskPickTVShowQuality(m *tb.Message) Handler {
 	}
 }
 
-func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) Handler {
+func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) chatbot.Handler {
 
 	if c.selectedTVShowSeasons == nil {
 		c.selectedTVShowSeasons = []int{}
@@ -182,9 +183,9 @@ func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) Handler {
 
 	options = append(options, "/cancel")
 	if len(c.selectedTVShowSeasons) > 0 {
-		SendKeyboardList(c.env.Bot, m.Sender, "Any other season?", options)
+		util.SendKeyboardList(c.bot.TClient, m.Sender, "Any other season?", options)
 	} else {
-		SendKeyboardList(c.env.Bot, m.Sender, "Which season would you like to download?", options)
+		util.SendKeyboardList(c.bot.TClient, m.Sender, "Which season would you like to download?", options)
 	}
 
 	return func(m *tb.Message) {
@@ -216,7 +217,7 @@ func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) Handler {
 
 			// Not a valid TV selection
 			if selectedSeason == nil {
-				SendError(c.env.Bot, m.Sender, "Invalid selection.")
+				util.SendError(c.bot.TClient, m.Sender, "Invalid selection.")
 				c.currentStep = c.AskPickTVShowSeason(m)
 				return
 			}
@@ -227,22 +228,22 @@ func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) Handler {
 	}
 }
 
-func (c *AddTVShowConversation) AskFolder(m *tb.Message) Handler {
+func (c *AddTVShowConversation) AskFolder(m *tb.Message) chatbot.Handler {
 
-	folders, err := c.env.Sonarr.GetFolders()
+	folders, err := c.bot.Sonarr.GetFolders()
 	c.folderResults = folders
 
 	// GetFolders Service Failed
 	if err != nil {
-		SendError(c.env.Bot, m.Sender, "Failed to get folders.")
-		c.env.CM.StopConversation(c)
+		util.SendError(c.bot.TClient, m.Sender, "Failed to get folders.")
+		c.bot.CM.StopConversation(c)
 		return nil
 	}
 
 	// No Results
 	if len(folders) == 0 {
-		SendError(c.env.Bot, m.Sender, "No destination folders found.")
-		c.env.CM.StopConversation(c)
+		util.SendError(c.bot.TClient, m.Sender, "No destination folders found.")
+		c.bot.CM.StopConversation(c)
 		return nil
 	}
 
@@ -252,9 +253,9 @@ func (c *AddTVShowConversation) AskFolder(m *tb.Message) Handler {
 	var msg []string
 	msg = append(msg, fmt.Sprintf("*Found %d folders:*", len(folders)))
 	for i, folder := range folders {
-		msg = append(msg, fmt.Sprintf("%d) %s", i+1, EscapeMarkdown(filepath.Base(folder.Path))))
+		msg = append(msg, fmt.Sprintf("%d) %s", i+1, util.EscapeMarkdown(filepath.Base(folder.Path))))
 	}
-	Send(c.env.Bot, m.Sender, strings.Join(msg, "\n"))
+	util.Send(c.bot.TClient, m.Sender, strings.Join(msg, "\n"))
 
 	// Send the custom reply keyboard
 	var options []string
@@ -262,7 +263,7 @@ func (c *AddTVShowConversation) AskFolder(m *tb.Message) Handler {
 		options = append(options, fmt.Sprintf("%s", filepath.Base(folder.Path)))
 	}
 	options = append(options, "/cancel")
-	SendKeyboardList(c.env.Bot, m.Sender, "Which folder should it download to?", options)
+	util.SendKeyboardList(c.bot.TClient, m.Sender, "Which folder should it download to?", options)
 
 	return func(m *tb.Message) {
 		// Set the selected folder
@@ -275,7 +276,7 @@ func (c *AddTVShowConversation) AskFolder(m *tb.Message) Handler {
 
 		// Not a valid folder selection
 		if c.selectedTVShow == nil {
-			SendError(c.env.Bot, m.Sender, "Invalid selection.")
+			util.SendError(c.bot.TClient, m.Sender, "Invalid selection.")
 			c.currentStep = c.AskFolder(m)
 			return
 		}
@@ -286,7 +287,7 @@ func (c *AddTVShowConversation) AskFolder(m *tb.Message) Handler {
 
 func (c *AddTVShowConversation) AddTVShow(m *tb.Message) {
 
-	_, err := c.env.Sonarr.AddTVShow(*c.selectedTVShow, sonarr.AddSeriesOptions{
+	_, err := c.bot.Sonarr.AddTVShow(*c.selectedTVShow, sonarr.AddSeriesOptions{
 		TVDBID:         c.selectedTVShow.TvdbID,
 		Title:          c.selectedTVShow.Title,
 		Seasons:        c.selectedTVShowSeasons,
@@ -298,23 +299,23 @@ func (c *AddTVShowConversation) AddTVShow(m *tb.Message) {
 
 	// Failed to add TV
 	if err != nil {
-		SendError(c.env.Bot, m.Sender, "Failed to add TV.")
-		c.env.CM.StopConversation(c)
+		util.SendError(c.bot.TClient, m.Sender, "Failed to add TV.")
+		c.bot.CM.StopConversation(c)
 		return
 	}
 
-	c.selectedTVShow.RemotePoster = c.env.Sonarr.GetPosterURL(*c.selectedTVShow)
+	c.selectedTVShow.RemotePoster = c.bot.Sonarr.GetPosterURL(*c.selectedTVShow)
 	if c.selectedTVShow.RemotePoster != "" {
 		photo := &tb.Photo{File: tb.FromURL(c.selectedTVShow.RemotePoster)}
-		c.env.Bot.Send(m.Sender, photo)
+		c.bot.TClient.Send(m.Sender, photo)
 	}
 
 	// Notify User
-	Send(c.env.Bot, m.Sender, "TV Show has been added!")
+	util.Send(c.bot.TClient, m.Sender, "TV Show has been added!")
 
 	// Notify Admin
-	adminMsg := fmt.Sprintf("%s added TV Show '%s'", DisplayName(m.Sender), EscapeMarkdown(c.selectedTVShow.String()))
-	SendAdmin(c.env.Bot, c.env.Users.Admins(), adminMsg)
+	adminMsg := fmt.Sprintf("%s added TV Show '%s'", util.DisplayName(m.Sender), util.EscapeMarkdown(c.selectedTVShow.String()))
+	util.SendAdmin(c.bot.TClient, c.bot.Users.Admins(), adminMsg)
 
-	c.env.CM.StopConversation(c)
+	c.bot.CM.StopConversation(c)
 }
