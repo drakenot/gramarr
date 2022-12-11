@@ -17,7 +17,7 @@ RUN go build -mod=readonly -o gramarr
 FROM alpine:3
 
 # Copy the binary to the production image from the builder stage.
-COPY --from=builder /go/src/app/gramarr /app/gramarr
+COPY --from=builder /go/src/app/gramarr /app/
 
 # Copy the config.json.template file to /config/config.json
 COPY config.json.template /config/config.json
