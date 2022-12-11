@@ -40,6 +40,7 @@ func NewClient(c Config) (*Client, error) {
 		password:   c.Password,
 		baseURL:    baseURL,
 		client:     r,
+		config:     c,
 	}
 	return &client, nil
 }
@@ -77,6 +78,7 @@ type Client struct {
 	baseURL    string
 	maxResults int
 	client     *resty.Client
+	config     Config
 }
 
 func (c *Client) DeleteTVShow(tvShowId int) (err error) {
@@ -84,12 +86,12 @@ func (c *Client) DeleteTVShow(tvShowId int) (err error) {
 	return
 }
 
-func (c *Client) SearchTVShow(tvdbId int) (movie TVShow, err error) {
+func (c *Client) SearchTVShow(tvdbId int) (show TVShow, err error) {
 	resp, err := c.client.R().SetQueryParam("term", "tvdb:"+strconv.Itoa(tvdbId)).SetResult(TVShow{}).Get("series/lookup")
 	if err != nil {
 		return
 	}
-	movie = *resp.Result().(*TVShow)
+	show = *resp.Result().(*TVShow)
 	return
 }
 
@@ -138,34 +140,62 @@ func (c *Client) GetSystemStatus() (SystemStatus, error) {
 	return systemStatus, nil
 }
 
-func (c *Client) AddTVShow(m TVShow, qualityProfile int, path string, requester string) (tvShow TVShow, err error) {
+func (c *Client) AddTVShow(show TVShow, options AddSeriesOptions) (*TVShow, error) {
 
 	request := AddTVShowRequest{
-		Title:            m.Title,
-		TitleSlug:        m.TitleSlug,
-		Images:           m.Images,
-		QualityProfileID: qualityProfile,
-		TVDBID:           m.TvdbID,
-		RootFolderPath:   path,
-		Monitored:        true,
-		SeasonFolder:     true,
-		Year:             m.Year,
-		Seasons:          m.Seasons,
-		AddOptions:       AddTVShowOptions{SearchForMissingEpisodes: true},
+		ID:                show.ID,
+		Title:             show.Title,
+		TitleSlug:         show.TitleSlug,
+		Images:            show.Images,
+		QualityProfileID:  c.config.QualityID,
+		LanguageProfileID: c.config.LanguageProfileID,
+		TVDBID:            show.TvdbID,
+		RootFolderPath:    options.RootFolderPath,
+		Path:              show.Path,
+		Monitored:         true,
+		SeasonFolder:      true,
+		Year:              show.Year,
+		Seasons:           show.Seasons,
+		AddOptions:        AddTVShowOptions{SearchForMissingEpisodes: options.SearchNow},
 	}
 
-	tag, err := c.GetTagByLabel(requester, true)
-	if err == nil {
-		request.Tags = []int{tag.Id}
+	// if the series already exists, we will simply just update it
+	if show.ID != 0 {
+		show.Monitored = options.Monitored
+		show.Seasons = buildSeasonList(options.Seasons, show.Seasons)
+
+		resp, err := c.client.R().SetBody(request).SetResult(TVShow{}).Put(fmt.Sprintf("series/%d", show.ID))
+		if err != nil {
+			return nil, err
+		}
+		result := *resp.Result().(*TVShow)
+
+		// Execute command to search for all monitored seasons
+		// TODO: only mark selected seasons as monitored
+		command := CommandRequest{
+			Name:     "SeriesSearch",
+			SeriesID: show.ID,
+		}
+		_, err = c.client.R().SetBody(command).Post("command")
+		if err != nil {
+			return nil, err
+		}
+
+		return &result, nil
 	}
 
+	// We force all seasons to false if its the first request
+	for i, _ := range show.Seasons {
+		show.Seasons[i].Monitored = false
+	}
+	request.Seasons = buildSeasonList(options.Seasons, show.Seasons)
 	resp, err := c.client.R().SetBody(request).SetResult(TVShow{}).Post("series")
 	if err != nil {
-		return
+		return nil, err
 	}
+	result := *resp.Result().(*TVShow)
 
-	tvShow = *resp.Result().(*TVShow)
-	return
+	return &result, nil
 }
 
 func (c *Client) GetTagByLabel(label string, createNew bool) (tvShowTag TVShowTag, err error) {
@@ -327,4 +357,35 @@ func (c *Client) GetPosterURL(tvShow TVShow) string {
 		}
 	}
 	return ""
+}
+
+func buildSeasonList(seasons []int, existingSeasons []*TVShowSeason) []*TVShowSeason {
+	if existingSeasons != nil {
+		newSeasons := make([]*TVShowSeason, len(existingSeasons))
+		for i, season := range existingSeasons {
+			if includes(seasons, season.SeasonNumber) {
+				season.Monitored = true
+			}
+			newSeasons[i] = season
+		}
+		return newSeasons
+	}
+
+	newSeasons := make([]*TVShowSeason, len(seasons))
+	for i, seasonNumber := range seasons {
+		newSeasons[i] = &TVShowSeason{
+			SeasonNumber: seasonNumber,
+			Monitored:    true,
+		}
+	}
+	return newSeasons
+}
+
+func includes(arr []int, val int) bool {
+	for _, v := range arr {
+		if v == val {
+			return true
+		}
+	}
+	return false
 }

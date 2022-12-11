@@ -26,7 +26,7 @@ type AddTVShowConversation struct {
 	TVShowResults           []sonarr.TVShow
 	folderResults           []sonarr.Folder
 	selectedTVShow          *sonarr.TVShow
-	selectedTVShowSeasons   []sonarr.TVShowSeason
+	selectedTVShowSeasons   []int
 	selectedQualityProfile  *sonarr.Profile
 	selectedLanguageProfile *sonarr.Profile
 	selectedFolder          *sonarr.Folder
@@ -114,7 +114,7 @@ func (c *AddTVShowConversation) AskPickTVShow(m *tb.Message) Handler {
 func (c *AddTVShowConversation) isSelectedSeason(s *sonarr.TVShowSeason) bool {
 
 	for _, season := range c.selectedTVShowSeasons {
-		if s.SeasonNumber == season.SeasonNumber {
+		if s.SeasonNumber == season {
 			return true
 		}
 	}
@@ -164,7 +164,7 @@ func (c *AddTVShowConversation) AskPickTVShowQuality(m *tb.Message) Handler {
 func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) Handler {
 
 	if c.selectedTVShowSeasons == nil {
-		c.selectedTVShowSeasons = []sonarr.TVShowSeason{}
+		c.selectedTVShowSeasons = []int{}
 	}
 
 	// Send custom reply keyboard
@@ -189,10 +189,10 @@ func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) Handler {
 
 	return func(m *tb.Message) {
 		if m.Text == "All" {
-			c.selectedTVShowSeasons = []sonarr.TVShowSeason{}
+			c.selectedTVShowSeasons = []int{}
 			for _, season := range c.selectedTVShow.Seasons {
 				if season.SeasonNumber > 0 {
-					c.selectedTVShowSeasons = append(c.selectedTVShowSeasons, *season)
+					c.selectedTVShowSeasons = append(c.selectedTVShowSeasons, season.SeasonNumber)
 				}
 			}
 			c.currentStep = c.AskFolder(m)
@@ -221,7 +221,7 @@ func (c *AddTVShowConversation) AskPickTVShowSeason(m *tb.Message) Handler {
 				return
 			}
 
-			c.selectedTVShowSeasons = append(c.selectedTVShowSeasons, *selectedSeason)
+			c.selectedTVShowSeasons = append(c.selectedTVShowSeasons, selectedSeason.SeasonNumber)
 			c.currentStep = c.AskPickTVShowSeason(m)
 		}
 	}
@@ -285,7 +285,16 @@ func (c *AddTVShowConversation) AskFolder(m *tb.Message) Handler {
 }
 
 func (c *AddTVShowConversation) AddTVShow(m *tb.Message) {
-	_, err := c.env.Sonarr.AddTVShow(*c.selectedTVShow, c.env.Config.Sonarr.QualityID, c.selectedFolder.Path, GetUserName(m))
+
+	_, err := c.env.Sonarr.AddTVShow(*c.selectedTVShow, sonarr.AddSeriesOptions{
+		TVDBID:         c.selectedTVShow.TvdbID,
+		Title:          c.selectedTVShow.Title,
+		Seasons:        c.selectedTVShowSeasons,
+		SeasonFolder:   true,
+		RootFolderPath: c.selectedFolder.Path,
+		Monitored:      true,
+		SearchNow:      true,
+	})
 
 	// Failed to add TV
 	if err != nil {

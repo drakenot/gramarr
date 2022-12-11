@@ -1,6 +1,7 @@
 gramarr
 users.json
 config.json
+__debug_bin
 
 .vscode/
 .idea/

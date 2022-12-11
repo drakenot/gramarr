@@ -111,6 +111,7 @@ type Profile struct {
 }
 
 type AddTVShowRequest struct {
+	ID                int              `json:"ID"`
 	Title             string           `json:"title"`
 	TitleSlug         string           `json:"titleSlug"`
 	Images            []TVShowImage    `json:"images"`
@@ -124,12 +125,26 @@ type AddTVShowRequest struct {
 	AddOptions        AddTVShowOptions `json:"addOptions"`
 	Year              int              `json:"year"`
 	Seasons           []*TVShowSeason  `json:"seasons"`
+	Path              string           `json:path,omitempty`
 }
 
 type AddTVShowOptions struct {
 	SearchForMissingEpisodes   bool `json:"searchForMissingEpisodes"`
 	IgnoreEpisodesWithFiles    bool `json:"ignoreEpisodesWithFiles"`
 	IgnoreEpisodesWithoutFiles bool `json:"ignoreEpisodesWithoutFiles"`
+}
+
+type AddSeriesOptions struct {
+	TVDBID            int    `json:"tvdbid"`
+	Title             string `json:"title"`
+	ProfileID         int    `json:"profileId"`
+	LanguageProfileID int    `json:"languageProfileId"`
+	Seasons           []int  `json:"seasons"`
+	SeasonFolder      bool   `json:"seasonFolder"`
+	RootFolderPath    string `json:"rootFolderPath"`
+	Tags              []int  `json:"tags"`
+	Monitored         bool   `json:"monitored"`
+	SearchNow         bool   `json:"searchNow"`
 }
 
 type SystemStatus struct {
@@ -154,4 +169,10 @@ type SystemStatus struct {
 	UrlBase           string `json:"urlBase"`
 	RuntimeVersion    string `json:"runtimeVersion"`
 	RuntimeName       string `json:"runtimeName"`
+}
+
+type CommandRequest struct {
+	Name         string `json:"name"`
+	SeasonNumber int    `json:"seasonNumber,omitempty"`
+	SeriesID     int    `json:"seriesId"`
 }
