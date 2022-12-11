@@ -11,15 +11,11 @@ COPY . .
 # -mod=readonly ensures that the go.mod and go.sum files are not updated.
 RUN go build -mod=readonly -o gramarr
 
-# Use the official Alpine image for a lean production container.
-# https://hub.docker.com/_/alpine
-# https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds
-FROM alpine:3
-
-# Copy the binary to the production image from the builder stage.
-COPY --from=builder /go/src/app/gramarr /app/
+# Copy the binary to the /app directory.
+RUN mkdir /app && cp gramarr /app/gramarr
 
 # Copy the config.json.template file to /config/config.json
 COPY config.json.template /config/config.json
 
+# Set the default command to run the gramarr binary.
 CMD ["/app/gramarr", "-configDir=/config"]
