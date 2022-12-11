@@ -22,4 +22,4 @@ COPY --from=builder /go/src/app/gramarr /app/gramarr
 # Copy the config.json.template file to /config/config.json
 COPY config.json.template /config/config.json
 
-CMD ["/app/grammar", "-configDir=/config"]
+CMD ["/app/gramarr", "-configDir=/config"]
