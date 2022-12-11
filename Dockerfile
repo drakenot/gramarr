@@ -4,7 +4,7 @@
 FROM golang:1.15 as builder
 
 # Create the /app and /config directories.
-RUN mkdir /app && mkdir /config
+#RUN mkdir /app && mkdir /config
 
 # Copy the config.json.template file to /config/config.json
 COPY ./config/config.json.template /config/config.json
