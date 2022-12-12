@@ -4,45 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	Users "github.com/drakenot/gramarr/internal/repos/users"
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-func Send(bot *tb.Bot, to tb.Recipient, msg string) {
-	bot.Send(to, msg, tb.ModeMarkdown)
-}
-
-func SendError(bot *tb.Bot, to tb.Recipient, msg string) {
-	bot.Send(to, msg, tb.ModeMarkdown)
-}
-
-func SendAdmin(bot *tb.Bot, to []Users.User, msg string) {
-	SendMany(bot, to, fmt.Sprintf("*[Admin]* %s", msg))
-}
-
-func SendKeyboardList(bot *tb.Bot, to tb.Recipient, msg string, list []string) {
-	var buttons []tb.ReplyButton
-	for _, item := range list {
-		buttons = append(buttons, tb.ReplyButton{Text: item})
-	}
-
-	var replyKeys [][]tb.ReplyButton
-	for _, b := range buttons {
-		replyKeys = append(replyKeys, []tb.ReplyButton{b})
-	}
-
-	bot.Send(to, msg, &tb.ReplyMarkup{
-		ReplyKeyboard:   replyKeys,
-		OneTimeKeyboard: true,
-	})
-}
-
-func SendMany(bot *tb.Bot, to []Users.User, msg string) {
-	for _, user := range to {
-		bot.Send(user, msg, tb.ModeMarkdown)
-	}
-}
-
+// DisplayName will generate a "display name" for a user
 func DisplayName(u *tb.User) string {
 	if u.FirstName != "" && u.LastName != "" {
 		return EscapeMarkdown(fmt.Sprintf("%s %s", u.FirstName, u.LastName))
@@ -51,6 +16,7 @@ func DisplayName(u *tb.User) string {
 	return EscapeMarkdown(u.FirstName)
 }
 
+// EscapeMarkdown will escape any markdown characters in a string
 func EscapeMarkdown(s string) string {
 	s = strings.Replace(s, "[", "\\[", -1)
 	s = strings.Replace(s, "]", "\\]", -1)
@@ -58,6 +24,7 @@ func EscapeMarkdown(s string) string {
 	return s
 }
 
+// GetUserName will generate a "user name" for a given user
 func GetUserName(m *tb.Message) string {
 	var username string
 	if len(m.Sender.Username) > 0 {

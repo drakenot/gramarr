@@ -1,21 +1,19 @@
+// Package is Media Bot application that interfaces with sonarr/radarr to manage media
 package main
 
 import (
 	"flag"
 	"fmt"
+	"github.com/drakenot/gramarr/internal/mediabot"
+	"github.com/drakenot/gramarr/internal/repos/config"
+	"github.com/drakenot/gramarr/internal/repos/users"
+	"github.com/drakenot/gramarr/pkg/radarr"
+	"github.com/drakenot/gramarr/pkg/sonarr"
+	"github.com/drakenot/gramarr/pkg/telegram"
 	"log"
 	"os"
 	"path/filepath"
 	"time"
-
-	"github.com/drakenot/gramarr/internal/mediabot"
-	"github.com/drakenot/gramarr/internal/repos/config"
-	"github.com/drakenot/gramarr/internal/repos/users"
-	"github.com/drakenot/gramarr/pkg/chatbot"
-	"github.com/drakenot/gramarr/pkg/radarr"
-	"github.com/drakenot/gramarr/pkg/sonarr"
-
-	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 // Flags
@@ -50,56 +48,21 @@ func main() {
 		}
 	}
 
-	var sn *sonarr.Client
+	var sc *sonarr.Client
 	if conf.Sonarr != nil {
-		sn, err = sonarr.NewClient(*conf.Sonarr)
+		sc, err = sonarr.NewClient(*conf.Sonarr)
 		if err != nil {
 			log.Fatalf("failed to create sonarr client: %v", err)
 		}
 	}
 
-	cm := chatbot.NewConversationManager()
-	router := chatbot.NewRouter(cm)
-
-	poller := tb.LongPoller{Timeout: 15 * time.Second}
-	bot, err := tb.NewBot(tb.Settings{
-		Token:  conf.Telegram.BotToken,
-		Poller: &poller,
-	})
+	tc, err := telegram.NewClient(conf.Telegram.BotToken, time.Minute*14)
 	if err != nil {
-		log.Fatalf("failed to create telegram bot client: %v", err)
+		log.Fatalf("failed to create telegram client: #{err}")
 	}
 
-	env := &mediabot.MediaBot{
-		Config:  conf,
-		TClient: bot,
-		Users:   users,
-		CM:      cm,
-		Radarr:  rc,
-		Sonarr:  sn,
-	}
+	mb := mediabot.NewMediaBot(conf, users, tc, rc, sc)
 
-	setupHandlers(router, env)
 	fmt.Fprintf(os.Stdout, "Gramarr is up and running. Go call your bot!\n")
-	bot.Start()
-}
-
-func setupHandlers(r *chatbot.Router, b *mediabot.MediaBot) {
-	// Send all telegram messages to our custom router
-	b.TClient.Handle(tb.OnText, r.Route)
-
-	// Commands
-	r.HandleFunc("/auth", b.RequirePrivate(b.RequireAuth(users.UANone, b.HandleAuth)))
-	r.HandleFunc("/start", b.RequirePrivate(b.RequireAuth(users.UANone, b.HandleStart)))
-	r.HandleFunc("/help", b.RequirePrivate(b.RequireAuth(users.UANone, b.HandleStart)))
-	r.HandleFunc("/cancel", b.RequirePrivate(b.RequireAuth(users.UANone, b.HandleCancel)))
-	r.HandleFunc("/addmovie", b.RequirePrivate(b.RequireAuth(users.UAMember, b.HandleAddMovie)))
-	r.HandleFunc("/addtv", b.RequirePrivate(b.RequireAuth(users.UAMember, b.HandleAddTVShow)))
-	r.HandleFunc("/users", b.RequirePrivate(b.RequireAuth(users.UAAdmin, b.HandleUsers)))
-
-	// Catchall Command
-	r.HandleFallback(b.RequirePrivate(b.RequireAuth(users.UANone, b.HandleFallback)))
-
-	// Conversation Commands
-	r.HandleConvoFunc("/cancel", b.HandleConvoCancel)
+	mb.Start()
 }

@@ -185,7 +185,7 @@ func (c *Client) AddTVShow(show TVShow, options AddSeriesOptions) (*TVShow, erro
 	}
 
 	// We force all seasons to false if its the first request
-	for i, _ := range show.Seasons {
+	for i := range show.Seasons {
 		show.Seasons[i].Monitored = false
 	}
 	request.Seasons = buildSeasonList(options.Seasons, show.Seasons)

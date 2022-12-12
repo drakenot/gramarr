@@ -10,14 +10,14 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-func (b *MediaBot) HandleAuth(m *tb.Message) {
+func (mb *MediaBot) HandleAuth(m *tb.Message) {
 	var msg []string
 	pass := m.Payload
-	user, exists := b.Users.User(m.Sender.ID)
+	user, exists := mb.users.User(m.Sender.ID)
 
 	// Empty Password?
 	if pass == "" {
-		util.Send(b.TClient, m.Sender, "Usage: `/auth [password]`")
+		mb.tele.Send(m.Sender, "Usage: `/auth [password]`")
 		return
 	}
 
@@ -26,15 +26,15 @@ func (b *MediaBot) HandleAuth(m *tb.Message) {
 		// Notify User
 		msg = append(msg, "You're already authorized.")
 		msg = append(msg, "Type /start to begin.")
-		util.Send(b.TClient, m.Sender, strings.Join(msg, "\n"))
+		mb.tele.Send(m.Sender, strings.Join(msg, "\n"))
 		return
 	}
 
 	// Check if pass is Admin Password
-	if pass == b.Config.Bot.AdminPassword {
+	if pass == mb.config.Bot.AdminPassword {
 		if exists {
 			user.Access = users.UAAdmin
-			b.Users.Update(user)
+			mb.users.Update(user)
 		} else {
 			newUser := users.User{
 				ID:        m.Sender.ID,
@@ -43,28 +43,28 @@ func (b *MediaBot) HandleAuth(m *tb.Message) {
 				Username:  m.Sender.Username,
 				Access:    users.UAAdmin,
 			}
-			b.Users.Create(newUser)
+			mb.users.Create(newUser)
 		}
 
 		// Notify User
 		msg = append(msg, "You have been authorized as an *admin*.")
 		msg = append(msg, "Type /start to begin.")
-		util.Send(b.TClient, m.Sender, strings.Join(msg, "\n"))
+		mb.tele.Send(m.Sender, strings.Join(msg, "\n"))
 
 		// Notify Admin
 		adminMsg := fmt.Sprintf("%s has been granted admin access.", util.DisplayName(m.Sender))
-		util.SendAdmin(b.TClient, b.Users.Admins(), adminMsg)
+		mb.tele.SendAdmin(mb.users.Admins(), adminMsg)
 
 		return
 	}
 
 	// Check if pass is User Password
-	if pass == b.Config.Bot.Password {
+	if pass == mb.config.Bot.Password {
 		if exists {
 			// Notify User
 			msg = append(msg, "You're already authorized.")
 			msg = append(msg, "Type /start to begin.")
-			util.Send(b.TClient, m.Sender, strings.Join(msg, "\n"))
+			mb.tele.Send(m.Sender, strings.Join(msg, "\n"))
 			return
 		}
 		newUser := users.User{
@@ -74,24 +74,24 @@ func (b *MediaBot) HandleAuth(m *tb.Message) {
 			LastName:  m.Sender.LastName,
 			Access:    users.UAMember,
 		}
-		b.Users.Create(newUser)
+		mb.users.Create(newUser)
 
 		// Notify User
 		msg = append(msg, "You have been authorized.")
 		msg = append(msg, "Type /start to begin.")
-		util.Send(b.TClient, m.Sender, strings.Join(msg, "\n"))
+		mb.tele.Send(m.Sender, strings.Join(msg, "\n"))
 
 		// Notify Admin
 		adminMsg := fmt.Sprintf("%s has been granted acccess.", util.DisplayName(m.Sender))
-		util.SendAdmin(b.TClient, b.Users.Admins(), adminMsg)
+		mb.tele.SendAdmin(mb.users.Admins(), adminMsg)
 		return
 	}
 
 	// Notify User
-	util.SendError(b.TClient, m.Sender, "Your password is invalid.")
+	mb.tele.SendError(m.Sender, "Your password is invalid.")
 
 	// Notify Admin
 	adminMsg := "%s made an invalid auth request with password: %s"
 	adminMsg = fmt.Sprintf(adminMsg, util.DisplayName(m.Sender), util.EscapeMarkdown(m.Payload))
-	util.SendAdmin(b.TClient, b.Users.Admins(), adminMsg)
+	mb.tele.SendAdmin(mb.users.Admins(), adminMsg)
 }
