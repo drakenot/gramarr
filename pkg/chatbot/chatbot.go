@@ -130,6 +130,6 @@ func (cb *ChatBot) parseCommand(m *tb.Message) (string, bool) {
 	}
 }
 
-func (cm *ChatBot) convoKey(m *tb.Message) string {
+func (cb *ChatBot) convoKey(m *tb.Message) string {
 	return fmt.Sprintf("%d:%d", m.Chat.ID, m.Sender.ID)
 }
